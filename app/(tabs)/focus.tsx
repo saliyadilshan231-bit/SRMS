@@ -124,7 +124,7 @@ export default function FocusScreen() {
               style={styles.topStripIconBtn}
               activeOpacity={0.85}
               onPress={() => router.push('/(tabs)/task-insights')}>
-              <IconSymbol size={24} name="chevron.left" color="#65707D" />
+              <IconSymbol size={24} name="chevron.left" color="#011125" />
             </TouchableOpacity>
 
             <Text style={styles.topStripTitle}>Focus</Text>
@@ -307,8 +307,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#f7f7f7',
   },
   chipActive: {
-    borderColor: '#F2856D',
-    backgroundColor: '#F2856D',
+    borderColor: '#0A0A5C',
+    backgroundColor: '#0A0A5C',
   },
   chipText: {
     fontSize: 12,
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: 52,
     fontWeight: '800',
-    color: '#F2856D',
+    color: '#0A0A5C',
     letterSpacing: 1,
   },
   actions: {

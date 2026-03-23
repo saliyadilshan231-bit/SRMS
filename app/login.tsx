@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   card: {
-    backgroundColor: '#F2856D',
+    backgroundColor: '#0A0A5C',
     width: 'auto',
     height: 'auto',
     borderRadius: 40,

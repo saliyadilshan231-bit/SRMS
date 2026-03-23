@@ -33,7 +33,7 @@ export default function SettingsScreen() {
           
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
-              <IconSymbol size={24} name="bell.fill" color="#F2856D" />
+              <IconSymbol size={24} name="bell.fill" color="#0A0A5C" />
               <View style={styles.settingText}>
                 <Text style={styles.settingLabel}>Notifications</Text>
                 <Text style={styles.settingSubtitle}>Receive updates</Text>
@@ -42,13 +42,13 @@ export default function SettingsScreen() {
             <Switch
               value={notificationsEnabled}
               onValueChange={setNotificationsEnabled}
-              trackColor={{ false: '#DDD', true: '#F2856D' }}
+              trackColor={{ false: '#DDD', true: '#0A0A5C' }}
             />
           </View>
 
           <View style={styles.settingItem}>
             <View style={styles.settingLeft}>
-              <IconSymbol size={24} name="moon.fill" color="#F2856D" />
+              <IconSymbol size={24} name="moon.fill" color="#0A0A5C" />
               <View style={styles.settingText}>
                 <Text style={styles.settingLabel}>Dark Mode</Text>
                 <Text style={styles.settingSubtitle}>Coming soon</Text>
@@ -69,7 +69,7 @@ export default function SettingsScreen() {
 
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingLeft}>
-              <IconSymbol size={24} name="lock.fill" color="#F2856D" />
+              <IconSymbol size={24} name="lock.fill" color="#0A0A5C" />
               <View style={styles.settingText}>
                 <Text style={styles.settingLabel}>Change Password</Text>
                 <Text style={styles.settingSubtitle}>Update security</Text>
@@ -80,7 +80,7 @@ export default function SettingsScreen() {
 
           <TouchableOpacity style={styles.settingItem}>
             <View style={styles.settingLeft}>
-              <IconSymbol size={24} name="info.circle.fill" color="#F2856D" />
+              <IconSymbol size={24} name="info.circle.fill" color="#0A0A5C" />
               <View style={styles.settingText}>
                 <Text style={styles.settingLabel}>About</Text>
                 <Text style={styles.settingSubtitle}>Version 1.0.0</Text>
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   logoutButton: {
-    backgroundColor: '#F2856D',
+    backgroundColor: '#0A0A5C',
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',

@@ -15,7 +15,7 @@ interface Notification {
   title: string;
   message: string;
   timestamp: string;
-  icon: string;
+  icon: React.ComponentProps<typeof IconSymbol>['name'];
   color: string;
   read: boolean;
 }
@@ -27,7 +27,7 @@ const notifications: Notification[] = [
     message: 'You have an upcoming assignment due tomorrow',
     timestamp: '2 hours ago',
     icon: 'checkmark.circle.fill',
-    color: '#F2856D',
+    color: '#0A0A5C',
     read: false,
   },
   {
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   unreadNotification: {
     backgroundColor: '#F5F5F7',
     borderLeftWidth: 4,
-    borderLeftColor: '#F2856D',
+    borderLeftColor: '#0A0A5C',
   },
   iconBox: {
     width: 48,
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#F2856D',
+    backgroundColor: '#0A0A5C',
     marginLeft: 8,
   },
 });

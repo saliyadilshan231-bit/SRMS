@@ -479,8 +479,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   chipActive: {
-    backgroundColor: '#F2856D',
-    borderColor: '#F2856D',
+    backgroundColor: '#0A0A5C',
+    borderColor: '#0A0A5C',
   },
   chipText: {
     color: '#333',
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
   groupTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#F2856D',
+    color: '#0A0A5C',
     marginBottom: 6,
   },
 });

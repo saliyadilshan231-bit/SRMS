@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   card: {
-    backgroundColor: '#F2856D',
+    backgroundColor: '#0A0A5C',
     width: width * 0.95,
     height: '98%',
     borderRadius: 40,
@@ -139,8 +139,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#F2856D',
+    color: '#0A0A5C',
     fontSize: 18,
     fontWeight: 'bold',
   },
 });
+

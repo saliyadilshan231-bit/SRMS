@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+﻿import { Tabs } from 'expo-router';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 
@@ -9,7 +9,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#F2856D',
+        tabBarActiveTintColor: '#0A0A5C',
         tabBarInactiveTintColor: '#999',
         headerShown: false,
         tabBarButton: HapticTab,

@@ -376,8 +376,8 @@ const styles = StyleSheet.create({
     borderColor: '#e5e5e5',
   },
   chipActive: {
-    backgroundColor: '#F2856D',
-    borderColor: '#F2856D',
+    backgroundColor: '#0A0A5C',
+    borderColor: '#0A0A5C',
   },
   chipText: {
     color: '#333',
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#F2856D',
+    color: '#0A0A5C',
     marginTop: 4,
   },
 });

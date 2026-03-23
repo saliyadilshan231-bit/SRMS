@@ -67,6 +67,21 @@ export default function DashboardScreen() {
   const router = useRouter();
   const [searchText, setSearchText] = useState('');
 
+  const getProjectRoute = (projectId: string) => {
+    switch (projectId) {
+      case '1':
+        return '/(tabs)/task-insights' as const;
+      case '2':
+        return '/(tabs)/focus' as const;
+      case '3':
+        return '/(tabs)/progress' as const;
+      case '4':
+        return '/(tabs)/grade-analyst' as const;
+      default:
+        return undefined;
+    }
+  };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return 'Good Morning';
@@ -120,7 +135,7 @@ export default function DashboardScreen() {
             <Text style={styles.welcomeDesc}>Let's schedule your projects</Text>
           </View>
           <View style={styles.welcomeIconContainer}>
-            <IconSymbol size={60} name="laptopcomputer" color="#F2856D" />
+            <IconSymbol size={60} name="laptopcomputer" color="#0A0A5C" />
           </View>
         </View>
 
@@ -136,14 +151,28 @@ export default function DashboardScreen() {
             <ProjectCardItem
               key={project.id}
               project={project}
-              onPress={project.id === '1' ? () => router.push('/(tabs)/task-insights') : undefined}
+              onPress={() => {
+                const route = getProjectRoute(project.id);
+                if (route) {
+                  router.push(route);
+                }
+              }}
             />
           ))}
         </View>
 
         <View style={styles.projectsGrid}>
           {projects.slice(2, 4).map((project) => (
-            <ProjectCardItem key={project.id} project={project} />
+            <ProjectCardItem
+              key={project.id}
+              project={project}
+              onPress={() => {
+                const route = getProjectRoute(project.id);
+                if (route) {
+                  router.push(route);
+                }
+              }}
+            />
           ))}
         </View>
 
@@ -209,7 +238,7 @@ function ProjectCardItem({
               styles.progressFill,
               {
                 width: `${project.progress}%`,
-                backgroundColor: project.id === '1' ? '#FFF' : '#F2856D',
+                backgroundColor: project.id === '1' ? '#FFF' : '#0A0A5C',
               },
             ]}
           />
@@ -291,7 +320,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#F2856D',
+    backgroundColor: '#0A0A5C',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -324,7 +353,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
     borderWidth: 2,
-    borderColor: '#F2856D',
+    borderColor: '#0A0A5C',
   },
   welcomeTitle: {
     fontSize: 18,
@@ -355,7 +384,7 @@ const styles = StyleSheet.create({
   },
   viewAll: {
     fontSize: 13,
-    color: '#F2856D',
+    color: '#0A0A5C',
     fontWeight: '600',
   },
   projectsGrid: {

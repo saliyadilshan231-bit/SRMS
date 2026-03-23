@@ -1,7 +1,7 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/auth';
 import { Stack } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -12,11 +12,11 @@ import {
   View,
 } from 'react-native';
 
-export default function ProfileScreen() {
+export default function Explore() {
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [name, setName] = React.useState(user?.name || '');
-  const [email, setEmail] = React.useState(user?.email || '');
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -27,7 +27,7 @@ export default function ProfileScreen() {
         <View style={styles.headerBar}>
           <Text style={styles.title}>Profile</Text>
           <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-            <IconSymbol size={24} name={isEditing ? 'checkmark' : 'pencil'} color="#F2856D" />
+            <IconSymbol size={24} name={isEditing ? 'checkmark' : 'pencil'} color="#0A0A5C" />
           </TouchableOpacity>
         </View>
 
@@ -85,7 +85,7 @@ export default function ProfileScreen() {
 
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <IconSymbol size={32} name="checkmark.circle.fill" color="#F2856D" />
+              <IconSymbol size={32} name="checkmark.circle.fill" color="#0A0A5C" />
               <Text style={styles.statValue}>8</Text>
               <Text style={styles.statLabel}>Tasks Done</Text>
             </View>
@@ -110,7 +110,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity style={styles.linkItem}>
             <View style={styles.linkLeft}>
-              <IconSymbol size={20} name="doc.fill" color="#F2856D" />
+              <IconSymbol size={20} name="doc.fill" color="#0A0A5C" />
               <Text style={styles.linkText}>My Documents</Text>
             </View>
             <IconSymbol size={16} name="chevron.right" color="#CCC" />
@@ -118,7 +118,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity style={styles.linkItem}>
             <View style={styles.linkLeft}>
-              <IconSymbol size={20} name="bookmark.fill" color="#F2856D" />
+              <IconSymbol size={20} name="bookmark.fill" color="#0A0A5C" />
               <Text style={styles.linkText}>Saved Items</Text>
             </View>
             <IconSymbol size={16} name="chevron.right" color="#CCC" />
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#F2856D',
+    backgroundColor: '#0A0A5C',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1a1a1a',
     borderBottomWidth: 1,
-    borderBottomColor: '#F2856D',
+    borderBottomColor: '#0A0A5C',
     paddingVertical: 8,
   },
   statsGrid: {
@@ -254,3 +254,4 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
 });
+

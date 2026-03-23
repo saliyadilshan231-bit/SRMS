@@ -1,22 +1,22 @@
-﻿import React from 'react';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useAuth } from '@/context/auth';
+import { Stack } from 'expo-router';
+import React, { useState } from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
+  StyleSheet,
+  Text,
   TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Stack } from 'expo-router';
-import { useAuth } from '@/context/auth';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 
-export default function ProfileScreen() {
+export default function Explore() {
   const { user } = useAuth();
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [name, setName] = React.useState(user?.name || '');
-  const [email, setEmail] = React.useState(user?.email || '');
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
 
   return (
     <SafeAreaView style={styles.container}>
@@ -132,7 +132,7 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
   },
   content: {
     paddingHorizontal: 16,

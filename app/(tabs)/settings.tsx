@@ -1,16 +1,16 @@
-﻿import React from 'react';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useAuth } from '@/context/auth';
+import { Stack } from 'expo-router';
+import React from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
   SafeAreaView,
   ScrollView,
-  TouchableOpacity,
+  StyleSheet,
   Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { Stack } from 'expo-router';
-import { useAuth } from '@/context/auth';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function SettingsScreen() {
   const { logout } = useAuth();
@@ -102,7 +102,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
   },
   content: {
     paddingHorizontal: 16,
@@ -166,4 +166,3 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
-

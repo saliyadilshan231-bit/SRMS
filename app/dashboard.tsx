@@ -254,7 +254,7 @@ function ProjectCardItem({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     height: 84,
     marginHorizontal: -16,
     marginBottom: 12,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
     justifyContent: 'center',
     paddingHorizontal: 14,
   },

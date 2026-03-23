@@ -1,22 +1,21 @@
-﻿import React from 'react';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Stack } from 'expo-router';
+import React from 'react';
 import {
+  FlatList,
+  SafeAreaView,
   StyleSheet,
   Text,
-  View,
-  SafeAreaView,
-  ScrollView,
   TouchableOpacity,
-  FlatList,
+  View
 } from 'react-native';
-import { Stack } from 'expo-router';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 
 interface Notification {
   id: string;
   title: string;
   message: string;
   timestamp: string;
-  icon: string;
+  icon: React.ComponentProps<typeof IconSymbol>['name'];
   color: string;
   read: boolean;
 }
@@ -113,7 +112,7 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
   },
   header: {
     flexDirection: 'row',
@@ -178,4 +177,3 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 });
-

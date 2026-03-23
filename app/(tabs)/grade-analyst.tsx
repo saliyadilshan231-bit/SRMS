@@ -1,3 +1,5 @@
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Stack, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   SafeAreaView,
@@ -8,8 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { IconSymbol } from '@/components/ui/icon-symbol';
 
 const gradePoints: Record<string, number> = {
   'A+': 4.0,
@@ -234,7 +234,7 @@ export default function GradeAnalystScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
   },
   content: {
     padding: 14,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   topStripWrap: {
     height: 84,
     marginBottom: 8,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
     justifyContent: 'center',
     paddingHorizontal: 2,
   },

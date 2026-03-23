@@ -1,6 +1,6 @@
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { Stack, useRouter } from 'expo-router';
+import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function TaskInsightsScreen() {
   const router = useRouter();
@@ -82,12 +82,12 @@ export default function TaskInsightsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
   },
   topStripWrap: {
     height: 84,
     marginBottom: 8,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
     justifyContent: 'center',
     paddingHorizontal: 14,
   },

@@ -1,4 +1,7 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useTaskManager } from '@/context/task-manager';
+import { Stack, useRouter } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   SafeAreaView,
@@ -10,9 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useTaskManager } from '@/context/task-manager';
 
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60)
@@ -231,7 +231,7 @@ export default function FocusScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
   },
   content: {
     padding: 16,
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     height: 84,
     marginHorizontal: -16,
     marginBottom: 8,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
     justifyContent: 'center',
     paddingHorizontal: 14,
   },
@@ -400,4 +400,3 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
 });
-

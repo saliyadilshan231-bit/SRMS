@@ -1,19 +1,19 @@
-﻿import { useState } from 'react';
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { useAuth } from '@/context/auth';
+import { Link, useRouter } from 'expo-router';
+import { useState } from 'react';
 import {
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import { Link, useRouter } from 'expo-router';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useAuth } from '@/context/auth';
 
 export default function LoginScreen() {
   const { login } = useAuth();
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 24,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
   },
   header: {
     alignItems: 'center',

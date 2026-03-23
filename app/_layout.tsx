@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '@/context/auth';
+import { TaskManagerProvider } from '@/context/task-manager';
 import { ActivityIndicator, View } from 'react-native';
 
 export const unstable_settings = {
@@ -86,7 +87,9 @@ function RootLayoutNav() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <TaskManagerProvider>
+        <RootLayoutNav />
+      </TaskManagerProvider>
     </AuthProvider>
   );
 }

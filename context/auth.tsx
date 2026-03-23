@@ -22,6 +22,14 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+function getErrorMessage(error: unknown, fallback: string) {
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = String((error as { message?: unknown }).message ?? '').trim();
+    if (message) return message;
+  }
+  return fallback;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,31 +50,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function login(email: string, password: string) {
-    await account.createEmailPasswordSession(email, password);
-    const currentUser = await account.get();
-    setUser(currentUser);
+    try {
+      const existingUser = await account.get();
+      if (existingUser) {
+        setUser(existingUser);
+        return;
+      }
+    } catch {
+      // No active session; continue with email/password login.
+    }
+
+    try {
+      await account.createEmailPasswordSession(email, password);
+      const currentUser = await account.get();
+      setUser(currentUser);
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'Unable to log in. Please check your credentials.'));
+    }
   }
 
   async function register(data: StudentData & { password: string }) {
     const { name, email, password, dateOfBirth, gender } = data;
-    await account.create(ID.unique(), email, password, name);
-    await account.createEmailPasswordSession(email, password);
-    const currentUser = await account.get();
 
-    // Save student profile to database
-    await databases.createDocument(DATABASE_ID, STUDENTS_COLLECTION_ID, currentUser.$id, {
-      name,
-      Students: name,
-      emailAddress: email,
-      dateOfBirth,
-      gender,
-    });
+    try {
+      await account.create(ID.unique(), email, password, name);
+      await account.createEmailPasswordSession(email, password);
+      const currentUser = await account.get();
 
-    setUser(currentUser);
+      // Profile document is optional. Do not block account signup if schema/permission differs.
+      try {
+        await databases.createDocument(DATABASE_ID, STUDENTS_COLLECTION_ID, ID.unique(), {
+          userId: currentUser.$id,
+          name,
+          email,
+          dateOfBirth,
+          gender,
+        });
+      } catch (profileError) {
+        console.warn('Profile document creation failed:', profileError);
+      }
+
+      setUser(currentUser);
+    } catch (error) {
+      throw new Error(getErrorMessage(error, 'Unable to register right now. Please try again.'));
+    }
   }
 
   async function logout() {
-    await account.deleteSession('current');
+    try {
+      await account.deleteSession('current');
+    } catch {
+      // Ignore if there is no active session.
+    }
     setUser(null);
   }
 

@@ -5,8 +5,7 @@ import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
 import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
-type IconSymbolName = keyof typeof MAPPING;
+type IconMapping = Partial<Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>>;
 
 /**
  * Add your SF Symbols to Material Icons mappings here.
@@ -15,7 +14,29 @@ type IconSymbolName = keyof typeof MAPPING;
  */
 const MAPPING = {
   'house.fill': 'home',
+  'person.fill': 'person',
+  gear: 'settings',
+  'bell.fill': 'notifications',
   'paperplane.fill': 'send',
+  magnifyingglass: 'search',
+  laptopcomputer: 'laptop',
+  ellipsis: 'more-horiz',
+  'checkmark.circle.fill': 'check-circle',
+  'person.2.fill': 'groups',
+  'heart.fill': 'favorite',
+  'doc.fill': 'description',
+  'bookmark.fill': 'bookmark',
+  'moon.fill': 'dark-mode',
+  'lock.fill': 'lock',
+  'chart.bar.fill': 'bar-chart',
+  timer: 'timer',
+  checkmark: 'check',
+  pencil: 'edit',
+  'info.circle.fill': 'info',
+  'bubble.right.fill': 'chat-bubble',
+  'square.grid.2x2.fill': 'grid-view',
+  calendar: 'calendar-month',
+  'chevron.left': 'chevron-left',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
 } as IconMapping;
@@ -31,11 +52,12 @@ export function IconSymbol({
   color,
   style,
 }: {
-  name: IconSymbolName;
+  name: SymbolViewProps['name'];
   size?: number;
   color: string | OpaqueColorValue;
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
+  const materialName = MAPPING[name] ?? 'help-outline';
+  return <MaterialIcons color={color} size={size} name={materialName} style={style} />;
 }

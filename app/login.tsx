@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -10,13 +10,14 @@ import {
   ScrollView,
   View,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/auth';
 
 export default function LoginScreen() {
   const { login } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +31,7 @@ export default function LoginScreen() {
     setIsLoading(true);
     try {
       await login(email.trim(), password);
+      router.replace('/(tabs)');
     } catch (error: any) {
       Alert.alert('Login Failed', error?.message || 'Something went wrong');
     } finally {
@@ -174,7 +176,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   card: {
-    backgroundColor: '#F2856D',
+    backgroundColor: '#0A0A5C',
     width: 'auto',
     height: 'auto',
     borderRadius: 40,

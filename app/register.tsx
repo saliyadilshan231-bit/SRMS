@@ -10,13 +10,14 @@ import {
   ScrollView,
   View,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/auth';
 
 export default function RegisterScreen() {
   const { register } = useAuth();
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
@@ -44,6 +45,7 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       await register({ name: name.trim(), email: email.trim(), password, dateOfBirth, gender });
+      router.replace('/(tabs)');
     } catch (error: any) {
       Alert.alert('Registration Failed', error?.message || 'Something went wrong');
     } finally {

@@ -1,15 +1,15 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Stack, useRouter } from 'expo-router';
 import React from 'react';
 import {
+  Dimensions,
+  Image,
+  SafeAreaView,
   StyleSheet,
   Text,
-  View,
-  Image,
   TouchableOpacity,
-  SafeAreaView,
-  Dimensions,
+  View,
 } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -70,7 +70,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
     alignItems: 'center',
     justifyContent: 'center',
   },

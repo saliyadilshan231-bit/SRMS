@@ -1,22 +1,23 @@
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { useAuth } from '@/context/auth';
+import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import { Link } from 'expo-router';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useAuth } from '@/context/auth';
 
 export default function LoginScreen() {
   const { login } = useAuth();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +31,7 @@ export default function LoginScreen() {
     setIsLoading(true);
     try {
       await login(email.trim(), password);
+      router.replace('/(tabs)');
     } catch (error: any) {
       Alert.alert('Login Failed', error?.message || 'Something went wrong');
     } finally {
@@ -116,7 +118,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 24,
-    backgroundColor: '#FDE7B5',
+    backgroundColor: '#0A0A5C',
   },
   header: {
     alignItems: 'center',

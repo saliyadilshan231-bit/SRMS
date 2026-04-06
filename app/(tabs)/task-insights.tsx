@@ -1,80 +1,77 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Stack, useRouter } from 'expo-router';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function TaskInsightsScreen() {
   const router = useRouter();
 
+  const accessItems = [
+    {
+      title: 'Tasks',
+      subtitle: 'Create, organize, and manage your tasks list.',
+      icon: 'checkmark.rectangle.fill',
+      color: '#48BB78',
+      route: '/(tabs)/tasks'
+    },
+    {
+      title: 'Progress',
+      subtitle: 'Track completion, submissions, and analytics.',
+      icon: 'chart.bar.fill',
+      color: '#6366F1',
+      route: '/(tabs)/progress'
+    },
+    {
+      title: 'Focus',
+      subtitle: 'Start Pomodoro sessions and monitor study time.',
+      icon: 'timer',
+      color: '#805AD5',
+      route: '/(tabs)/focus'
+    },
+    {
+      title: 'Notification Hub',
+      subtitle: 'View all your notifications and stay updated.',
+      icon: 'bell.fill',
+      color: '#5C6BC0',
+      route: '/(tabs)/notificationHub'
+    }
+  ];
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={styles.topStripWrap}>
-        <View style={styles.topStripCard}>
-          <TouchableOpacity
-            style={styles.topStripIconBtn}
-            activeOpacity={0.85}
-            onPress={() => router.back()}>
-            <IconSymbol size={24} name="chevron.left" color="#65707D" />
-          </TouchableOpacity>
+      {/* Header Section */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+          <IconSymbol size={18} name="chevron.left" color="#8A9DBA" />
+        </TouchableOpacity>
 
-          <Text style={styles.topStripTitle}>Quick Access</Text>
-
-          <TouchableOpacity
-            style={styles.topStripIconBtn}
-            activeOpacity={0.85}
-            onPress={() => router.push('/(tabs)/notifications')}>
-            <IconSymbol size={22} name="bell.fill" color="#18326E" />
-            <View style={styles.notifyDot} />
-          </TouchableOpacity>
-        </View>
+        <Text style={styles.headerTitle}>Quick Access</Text>
+        <View style={{ width: 45 }} />
       </View>
 
-      <View style={styles.content}>
-        <TouchableOpacity
-          style={styles.infoCard}
-          activeOpacity={0.85}
-          onPress={() => router.push('/(tabs)/tasks')}>
-          <IconSymbol size={42} name="checkmark.circle.fill" color="#2E5578" />
-          <View style={styles.textWrap}>
-            <Text style={styles.title}>Tasks</Text>
-            <Text style={styles.subtitle}>Create, organize, and manage your tasks list.</Text>
-          </View>
-        </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.content}>
+        {accessItems.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.card}
+            activeOpacity={0.7}
+            onPress={() => router.push(item.route as any)}>
 
-        <TouchableOpacity
-          style={styles.infoCard}
-          activeOpacity={0.85}
-          onPress={() => router.push('/(tabs)/progress')}>
-          <IconSymbol size={42} name="chart.bar.fill" color="#2E5578" />
-          <View style={styles.textWrap}>
-            <Text style={styles.title}>Progress</Text>
-            <Text style={styles.subtitle}>Track completion, submissions, and analytics.</Text>
-          </View>
-        </TouchableOpacity>
+            {/* Icon container with light background */}
+            <View style={[styles.iconContainer, { backgroundColor: `${item.color}15` }]}>
+              <IconSymbol size={28} name={item.icon as any} color={item.color} />
+            </View>
 
-        <TouchableOpacity
-          style={styles.infoCard}
-          activeOpacity={0.85}
-          onPress={() => router.push('/(tabs)/focus')}>
-          <IconSymbol size={42} name="timer" color="#2E5578" />
-          <View style={styles.textWrap}>
-            <Text style={styles.title}>Focus</Text>
-            <Text style={styles.subtitle}>Start Pomodoro sessions and monitor study time.</Text>
-          </View>
-        </TouchableOpacity>
+            <View style={styles.textWrap}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.subtitle}>{item.subtitle}</Text>
+            </View>
 
-        <TouchableOpacity
-          style={styles.infoCard}
-          activeOpacity={0.85}
-          onPress={() => router.push('/(tabs)/grade-analyst')}>
-          <IconSymbol size={42} name="chart.bar.fill" color="#2E5578" />
-          <View style={styles.textWrap}>
-            <Text style={styles.title}>Grade Analyst</Text>
-            <Text style={styles.subtitle}>Calculate GPA and plan target performance smartly.</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
+            <IconSymbol size={14} name="chevron.right" color="#CBD5E0" />
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -82,72 +79,97 @@ export default function TaskInsightsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A5C',
+    backgroundColor: '#F7FAFC',
   },
-  topStripWrap: {
-    height: 84,
-    marginBottom: 8,
-    backgroundColor: '#0A0A5C',
-    justifyContent: 'center',
-    paddingHorizontal: 14,
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#0B173B',
   },
-  topStripCard: {
-    height: 56,
-    borderRadius: 28,
+  backgroundImage: {
+    opacity: 0.95,
+    resizeMode: 'cover',
+  },
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    marginTop: 10,
   },
-  topStripIconBtn: {
-    padding: 10,
-    borderRadius: 17,
-    backgroundColor: '#FFFFFF',
+  backBtn: {
+    width: 45,
+    height: 45,
+    borderRadius: 12,
+    backgroundColor: '#1D2A51',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  topStripTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1F2A38',
-    letterSpacing: 0.3,
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  bellBtn: {
+    width: 45,
+    height: 45,
+    borderRadius: 12,
+    backgroundColor: '#1D2A51',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   notifyDot: {
     position: 'absolute',
-    right: 6,
-    top: 6,
+    top: 12,
+    right: 12,
     width: 8,
     height: 8,
-    borderRadius: 5,
-    backgroundColor: '#FF5A5A',
+    borderRadius: 4,
+    backgroundColor: '#FF4D4D',
+    borderWidth: 1.5,
+    borderColor: '#EBF4FF',
   },
   content: {
-    padding: 14,
-    gap: 12,
+    padding: 20,
+    gap: 16,
   },
-  infoCard: {
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: '#5E7D97',
-    backgroundColor: '#F4F5EF',
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 16,
+    // Shadow for iOS and Android
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#EDF2F7',
+  },
+  iconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   textWrap: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 15,
+    marginRight: 10,
   },
   title: {
-    fontSize: 30,
+    fontSize: 20,
     fontWeight: '800',
-    color: '#1D1D1D',
+    color: '#1A202C',
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#1F2E3A',
+    fontSize: 14,
+    color: '#718096',
     fontWeight: '500',
+    lineHeight: 18,
   },
 });

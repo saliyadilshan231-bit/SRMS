@@ -1,257 +1,262 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/auth';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Stack } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  Dimensions,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
-export default function Explore() {
+const { width } = Dimensions.get('window');
+
+export default function ProfileScreen() {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(user?.name || '');
-  const [email, setEmail] = useState(user?.email || '');
+  const [name, setName] = useState(user?.name || 'Upeksha Methsarani');
+  const [email, setEmail] = useState(user?.email || 'upeksamethsarani137@gmail.com');
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
+      
+      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+        {/* Blue Header Section */}
+        <LinearGradient
+          colors={['#0B173B', '#0B173B']}
+          style={styles.headerBackground}
+        >
+          <SafeAreaView>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatarWrapper}>
+                <View style={styles.avatarCircle}>
+                  <Text style={styles.avatarLetter}>{name.charAt(0)}</Text>
+                </View>
+                <TouchableOpacity style={styles.editIconBadge}>
+                   <IconSymbol size={14} name="pencil" color="#0B173B" />
+                </TouchableOpacity>
+              </View>
+              
+              <Text style={styles.userNameText}>{name}</Text>
+              <Text style={styles.userSubText}>Student • SRMS</Text>
+              
+              <View style={styles.tagBadge}>
+                 <Text style={styles.tagText}>🎓 Undergraduate • Year 3</Text>
+              </View>
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        {/* Header */}
-        <View style={styles.headerBar}>
-          <Text style={styles.title}>Profile</Text>
-          <TouchableOpacity onPress={() => setIsEditing(!isEditing)}>
-            <IconSymbol size={24} name={isEditing ? 'checkmark' : 'pencil'} color="#0A0A5C" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Avatar Section */}
-        <View style={styles.avatarSection}>
-          <View style={styles.largeAvatar}>
-            <Text style={styles.largeAvatarText}>{user?.name?.charAt(0) || 'U'}</Text>
-          </View>
-          <Text style={styles.userName}>{user?.name || 'User Name'}</Text>
-          <Text style={styles.userRole}>Student</Text>
-        </View>
-
-        {/* Profile Info */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Personal Information</Text>
-
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Full Name</Text>
-            {isEditing ? (
-              <TextInput
-                style={styles.input}
-                value={name}
+        {/* White Content Section */}
+        <View style={styles.whiteContent}>
+          
+          {/* Personal Information */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>PERSONAL INFORMATION</Text>
+            <View style={styles.card}>
+              <InfoRow 
+                icon="person.fill" 
+                label="FULL NAME" 
+                value={name} 
+                isEditing={isEditing}
                 onChangeText={setName}
-                placeholder="Enter your name"
               />
-            ) : (
-              <Text style={styles.infoValue}>{name || 'Not provided'}</Text>
-            )}
-          </View>
-
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Email</Text>
-            {isEditing ? (
-              <TextInput
-                style={styles.input}
-                value={email}
+              <View style={styles.divider} />
+              <InfoRow 
+                icon="envelope.fill" 
+                label="EMAIL" 
+                value={email} 
+                isEditing={isEditing}
                 onChangeText={setEmail}
-                placeholder="Enter your email"
-                editable={false}
+                showCopy
               />
-            ) : (
-              <Text style={styles.infoValue}>{email || 'Not provided'}</Text>
-            )}
-          </View>
-
-          <View style={styles.infoCard}>
-            <Text style={styles.infoLabel}>Student ID</Text>
-            <Text style={styles.infoValue}>{user?.email?.split('@')[0] || 'STU-2025-001'}</Text>
-          </View>
-        </View>
-
-        {/* Statistics */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Statistics</Text>
-
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <IconSymbol size={32} name="checkmark.circle.fill" color="#0A0A5C" />
-              <Text style={styles.statValue}>8</Text>
-              <Text style={styles.statLabel}>Tasks Done</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <IconSymbol size={32} name="person.2.fill" color="#D4A5C5" />
-              <Text style={styles.statValue}>5</Text>
-              <Text style={styles.statLabel}>Kuppi Groups</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <IconSymbol size={32} name="heart.fill" color="#E8B4A8" />
-              <Text style={styles.statValue}>Good</Text>
-              <Text style={styles.statLabel}>Wellbeing</Text>
+              <View style={styles.divider} />
+              <InfoRow 
+                icon="person.crop.card.fill" 
+                label="STUDENT ID" 
+                value="upeksamethsarani137" 
+                showCopy
+              />
             </View>
           </View>
-        </View>
 
-        {/* Quick Links */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Links</Text>
-
-          <TouchableOpacity style={styles.linkItem}>
-            <View style={styles.linkLeft}>
-              <IconSymbol size={20} name="doc.fill" color="#0A0A5C" />
-              <Text style={styles.linkText}>My Documents</Text>
+          {/* Statistics */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>STATISTICS</Text>
+            <View style={styles.statsGrid}>
+              <StatBox icon="checkmark.square.fill" value="8" label="Tasks Done" iconColor="#4CAF50" />
+              <StatBox icon="person.2.fill" value="5" label="Kuppi Groups" iconColor="#673AB7" />
+              <StatBox icon="heart.fill" value="Good" label="Wellbeing" iconColor="#F44336" />
             </View>
-            <IconSymbol size={16} name="chevron.right" color="#CCC" />
-          </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity style={styles.linkItem}>
-            <View style={styles.linkLeft}>
-              <IconSymbol size={20} name="bookmark.fill" color="#0A0A5C" />
-              <Text style={styles.linkText}>Saved Items</Text>
-            </View>
-            <IconSymbol size={16} name="chevron.right" color="#CCC" />
-          </TouchableOpacity>
+          {/* Quick Links */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>QUICK LINKS</Text>
+            <QuickLink icon="doc.fill" label="My Documents" color="#E3F2FD" iconC="#2196F3" />
+            <QuickLink icon="tag.fill" label="Saved Items" color="#FCE4EC" iconC="#E91E63" />
+            <QuickLink icon="chart.bar.fill" label="My Progress" color="#E8F5E9" iconC="#4CAF50" />
+          </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+
+      {/* Floating Edit Button (Optional) */}
+      <TouchableOpacity 
+        style={styles.floatingEditBtn} 
+        onPress={() => setIsEditing(!isEditing)}
+      >
+        <IconSymbol size={24} name={isEditing ? 'checkmark' : 'pencil'} color="#FFF" />
+      </TouchableOpacity>
+    </View>
   );
 }
 
+// Reusable Components
+interface InfoRowProps {
+  icon: any;
+  label: string;
+  value: string;
+  isEditing?: boolean;
+  onChangeText?: (text: string) => void;
+  showCopy?: boolean;
+}
+
+const InfoRow = ({ icon, label, value, isEditing, onChangeText, showCopy }: InfoRowProps) => (
+  <View style={styles.infoRow}>
+    <View style={styles.infoIconBox}>
+      <IconSymbol size={20} name={icon} color="#0B173B" />
+    </View>
+    <View style={styles.infoTextContent}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      {isEditing ? (
+        <TextInput style={styles.input} value={value} onChangeText={onChangeText} />
+      ) : (
+        <Text style={styles.infoValue}>{value}</Text>
+      )}
+    </View>
+    {showCopy && <IconSymbol size={18} name="doc.on.doc" color="#CCC" />}
+  </View>
+);
+
+interface StatBoxProps {
+  icon: any;
+  value: string | number;
+  label: string;
+  iconColor: string;
+}
+
+const StatBox = ({ icon, value, label, iconColor }: StatBoxProps) => (
+  <View style={styles.statBox}>
+    <IconSymbol size={28} name={icon} color={iconColor} />
+    <Text style={styles.statValue}>{value}</Text>
+    <Text style={styles.statLabel}>{label}</Text>
+  </View>
+);
+
+interface QuickLinkProps {
+  icon: any;
+  label: string;
+  color: string;
+  iconC: string;
+}
+
+const QuickLink = ({ icon, label, color, iconC }: QuickLinkProps) => (
+  <TouchableOpacity style={styles.linkRow}>
+    <View style={[styles.linkIconBox, { backgroundColor: color }]}>
+      <IconSymbol size={20} name={icon} color={iconC} />
+    </View>
+    <Text style={styles.linkText}>{label}</Text>
+    <IconSymbol size={16} name="chevron.right" color="#CCC" />
+  </TouchableOpacity>
+);
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0A0A5C',
+  container: { flex: 1, backgroundColor: '#F8F9FE' },
+  headerBackground: {
+    paddingBottom: 40,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
-  content: {
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-  },
-  headerBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1a1a1a',
-  },
-  avatarSection: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  largeAvatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#0A0A5C',
+  avatarContainer: { alignItems: 'center', marginTop: 20 },
+  avatarWrapper: { position: 'relative' },
+  avatarCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderWidth: 3,
+    borderColor: '#FFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
   },
-  largeAvatarText: {
-    fontSize: 48,
-    fontWeight: '700',
-    color: '#FFF',
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1a1a1a',
-  },
-  userRole: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 4,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: 12,
-  },
-  infoCard: {
+  avatarLetter: { fontSize: 40, color: '#FFF', fontWeight: 'bold' },
+  editIconBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
     backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 14,
+    padding: 6,
+    borderRadius: 15,
+  },
+  userNameText: { fontSize: 24, fontWeight: 'bold', color: '#FFF', marginTop: 15 },
+  userSubText: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
+  tagBadge: {
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    paddingHorizontal: 15,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginTop: 15,
+  },
+  tagText: { color: '#FFF', fontSize: 12, fontWeight: '600' },
+  whiteContent: { marginTop: -25, paddingHorizontal: 20 },
+  section: { marginBottom: 25 },
+  sectionTitle: { fontSize: 13, fontWeight: 'bold', color: '#718096', marginBottom: 12, marginLeft: 5 },
+  card: { backgroundColor: '#FFF', borderRadius: 20, padding: 15, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 10 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10 },
+  infoIconBox: { width: 40, height: 40, borderRadius: 10, backgroundColor: '#F0F2FF', justifyContent: 'center', alignItems: 'center' },
+  infoTextContent: { flex: 1, marginLeft: 15 },
+  infoLabel: { fontSize: 10, color: '#999', fontWeight: 'bold' },
+  infoValue: { fontSize: 15, color: '#333', fontWeight: '600', marginTop: 2 },
+  divider: { height: 1, backgroundColor: '#F0F0F0', marginVertical: 5 },
+  statsGrid: { flexDirection: 'row', justifyContent: 'space-between' },
+  statBox: { 
+    width: (width - 60) / 3, 
+    backgroundColor: '#FFF', 
+    borderRadius: 20, 
+    padding: 15, 
+    alignItems: 'center',
+    elevation: 2, shadowOpacity: 0.05
+  },
+  statValue: { fontSize: 18, fontWeight: 'bold', color: '#333', marginTop: 8 },
+  statLabel: { fontSize: 10, color: '#999', marginTop: 2 },
+  linkRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: '#FFF', 
+    padding: 12, 
+    borderRadius: 15, 
     marginBottom: 10,
+    elevation: 1 
   },
-  infoLabel: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  infoValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-  input: {
-    fontSize: 16,
-    color: '#1a1a1a',
-    borderBottomWidth: 1,
-    borderBottomColor: '#0A0A5C',
-    paddingVertical: 8,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    gap: 10,
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 14,
+  linkIconBox: { padding: 10, borderRadius: 12 },
+  linkText: { flex: 1, marginLeft: 15, fontSize: 15, fontWeight: '600', color: '#333' },
+  floatingEditBtn: {
+    position: 'absolute',
+    bottom: 30,
+    right: 20,
+    backgroundColor: '#0B173B',
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
     alignItems: 'center',
+    elevation: 5,
   },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 11,
-    color: '#999',
-    marginTop: 4,
-    textAlign: 'center',
-  },
-  linkItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-  },
-  linkLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  linkText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginLeft: 12,
-  },
-});
-
+  input: { borderBottomWidth: 1, borderBottomColor: '#0B173B', padding: 0, fontSize: 15 }
+}); 

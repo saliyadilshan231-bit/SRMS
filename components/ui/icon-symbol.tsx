@@ -47,6 +47,10 @@ const MAPPING = {
   'play.fill': 'play-arrow',
   'pause.fill': 'pause',
   'arrow.counterclockwise': 'refresh',
+  'exclamationmark.triangle.fill': 'warning',
+  'clock.fill': 'access-time',
+  'robot.fill': 'smart-toy',
+  'bell.slash': 'notifications-off',
 } as IconMapping;
 
 /**

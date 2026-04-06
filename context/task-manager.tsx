@@ -283,7 +283,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
           relatedTaskId: doc.relatedTaskId
         }));
 
-        setDbNotifications(mappedNotifs.sort((a,b) => (a.unread === b.unread ? 0 : a.unread ? -1 : 1)));
+        setDbNotifications(mappedNotifs.sort((a, b) => (a.unread === b.unread ? 0 : a.unread ? -1 : 1)));
 
       } catch (error) {
         console.error('Failed to fetch data from Appwrite:', error);

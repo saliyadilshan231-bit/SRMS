@@ -1,5 +1,6 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/auth';
+import { useTaskManager } from '@/context/task-manager';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -28,61 +29,94 @@ interface ProjectCard {
   accentColor: string;
 }
 
-const projects: ProjectCard[] = [
-  {
-    id: '1',
-    title: 'Task Management',
-    description: 'Organize your academic work',
-    icon: 'checkmark.square.fill',
-    date: 'May 30, 2025',
-    progress: 65,
-    bgColor: '#3A025B',
-    isDark: true,
-    accentColor: '#FFFFFF',
-  },
-  {
-    id: '2',
-    title: 'Kuppi Management',
-    description: 'Manage study groups',
-    icon: 'person.2.fill',
-    date: 'May 30, 2025',
-    progress: 40,
-    bgColor: '#FFFFFF',
-    isDark: false,
-    accentColor: '#3A025B',
-  },
-  {
-    id: '3',
-    title: 'Wellbeing',
-    description: 'Track wellness',
-    icon: 'heart.fill',
-    date: 'May 30, 2025',
-    progress: 55,
-    bgColor: '#FFFFFF',
-    isDark: false,
-    accentColor: '#48BB78',
-  },
-  {
-    id: '4',
-    title: 'Feedback',
-    description: 'Collect insights',
-    icon: 'bubble.left.fill',
-    date: 'May 30, 2025',
-    progress: 30,
-    bgColor: '#FFFFFF',
-    isDark: false,
-    accentColor: '#ECC94B',
-  },
-];
-
 export default function DashboardScreen() {
   const { user } = useAuth();
+  const { tasks, sessions } = useTaskManager();
   const router = useRouter();
   const { isDark } = useTheme();
   const colors = useThemeColors();
   const [searchText, setSearchText] = useState('');
 
   const userName = user?.name?.split(' ')[0] || 'Pasindu';
+
+  const monthName = new Date().toLocaleString('en-US', { month: 'long' });
+
+  const dynamicProjects = useMemo(() => {
+    const totalTasks = tasks.length;
+    const avgProgress = totalTasks > 0 
+      ? Math.round(tasks.reduce((acc, t) => acc + t.progress, 0) / totalTasks) 
+      : 0;
+    
+    // Get latest task date or default
+    const latestTask = tasks.length > 0 
+      ? [...tasks].sort((a,b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]
+      : null;
+    
+    const taskDate = latestTask 
+      ? new Date(latestTask.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      : 'No tasks yet';
+
+    return [
+      {
+        id: '1',
+        title: 'Task Management',
+        description: totalTasks > 0 ? `${totalTasks} Active Tasks` : 'Organize your academic work',
+        icon: 'checkmark.square.fill',
+        date: taskDate,
+        progress: avgProgress,
+        bgColor: '#3A025B',
+        isDark: true,
+        accentColor: '#FFFFFF',
+      },
+      {
+        id: '2',
+        title: 'Kuppi Management',
+        description: 'Manage study groups',
+        icon: 'person.2.fill' as any,
+        date: 'June 15, 2025',
+        progress: 40,
+        bgColor: '#FFFFFF',
+        isDark: false,
+        accentColor: '#3A025B',
+      },
+      {
+        id: '3',
+        title: 'Wellbeing',
+        description: 'Track wellness',
+        icon: 'heart.fill' as any,
+        date: 'June 10, 2025',
+        progress: 55,
+        bgColor: '#FFFFFF',
+        isDark: false,
+        accentColor: '#48BB78',
+      },
+      {
+        id: '4',
+        title: 'Feedback',
+        description: 'Collect insights',
+        icon: 'bubble.left.fill' as any,
+        date: 'June 05, 2025',
+        progress: 30,
+        bgColor: '#FFFFFF',
+        isDark: false,
+        accentColor: '#ECC94B',
+      },
+    ];
+  }, [tasks]);
+
+  const stats = useMemo(() => {
+    const totalTasks = tasks.length;
+    const avgProgress = totalTasks > 0 
+      ? Math.round(tasks.reduce((acc, t) => acc + t.progress, 0) / totalTasks) 
+      : 0;
+    const sessionCount = sessions.length;
+    
+    return {
+      avgProgress: `${avgProgress}%`,
+      sessionCount: String(sessionCount),
+      resourceCount: '12'
+    };
+  }, [tasks, sessions]);
 
   const [displayDate, setDisplayDate] = useState('');
   const [displayGreeting, setDisplayGreeting] = useState('GOOD MORNING.');
@@ -149,7 +183,6 @@ export default function DashboardScreen() {
     return days;
   }, [displayDate]); // Recalculate if date changes (once per minute)
 
-  const monthName = new Date().toLocaleString('en-US', { month: 'long' });
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? colors.background : colors.navy }]}>
@@ -196,15 +229,15 @@ export default function DashboardScreen() {
           {/* Stats Row */}
           <View style={styles.statsContainer}>
             <View style={[styles.statCard, { backgroundColor: colors.iconBg, borderColor: colors.border }]}>
-              <Text style={styles.statNumber}>3</Text>
+              <Text style={styles.statNumber}>{stats.sessionCount}</Text>
               <Text style={[styles.statLabel, { color: isDark ? colors.accent : '#8A9DBA' }]}>Sessions</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: colors.iconBg, borderColor: colors.border }]}>
-              <Text style={styles.statNumber}>65%</Text>
+              <Text style={styles.statNumber}>{stats.avgProgress}</Text>
               <Text style={[styles.statLabel, { color: isDark ? colors.accent : '#8A9DBA' }]}>Progress</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: colors.iconBg, borderColor: colors.border }]}>
-              <Text style={styles.statNumber}>12</Text>
+              <Text style={styles.statNumber}>{stats.resourceCount}</Text>
               <Text style={[styles.statLabel, { color: isDark ? colors.accent : '#8A9DBA' }]}>Resources</Text>
             </View>
           </View>
@@ -217,7 +250,7 @@ export default function DashboardScreen() {
           <Text style={[styles.sectionTitle, { color: isDark ? colors.white : colors.navy }]}>Ongoing Projects</Text>
 
           {/* Feature Cards properly mapping old data */}
-          {projects.map((project, index) => {
+          {dynamicProjects.map((project: any, index: number) => {
             const iconBgColors = ['#E0EEFF', '#F3EAFF', '#FFF5E0', '#E0F8EA'];
             const iconBgColor = iconBgColors[index % iconBgColors.length];
             const iconColor = ['#5C8EE6', '#8D55CD', '#D29922', '#38A169'][index % iconBgColors.length];

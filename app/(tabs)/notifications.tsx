@@ -22,94 +22,59 @@ interface Notification {
 }
 
 export default function NotificationsScreen() {
-  const { tasks } = useTaskManager();
+  const { notifications, markNotifAsRead, deleteNotification, markAllNotifsAsRead, isSyncing } = useTaskManager();
 
-  const dynamicNotifications: Notification[] = useMemo(() => {
-    const list: Notification[] = [];
-    const now = new Date();
-
-    tasks.forEach((task: TaskItem) => {
-      if (task.deadline) {
-        // Attempt to parse deadline. Format might be "YYYY-MM-DD HH:MM" or ISO
-        const d = new Date(task.deadline);
-        const diffHours = (d.getTime() - now.getTime()) / (1000 * 60 * 60);
-
-        if (diffHours < 0 && task.progress < 100) {
-          list.push({
-            id: `overdue-${task.id}`,
-            title: 'Overdue Task',
-            message: `"${task.title}" was due at ${task.deadline.split('T')[0]}`,
-            timestamp: 'Action required',
-            icon: 'exclamationmark.triangle.fill',
-            color: '#E53E3E',
-            read: false,
-          });
-        } else if (diffHours > 0 && diffHours < 24) {
-          list.push({
-            id: `upcoming-${task.id}`,
-            title: 'Upcoming Deadline',
-            message: `"${task.title}" is due soon!`,
-            timestamp: 'In less than 24h',
-            icon: 'clock.fill',
-            color: '#D69E2E',
-            read: false,
-          });
-        }
-      }
-    });
-
-    // Add completion notifications if any tasks are 100%
-    tasks.filter(t => t.progress === 100).slice(0, 3).forEach(task => {
-        list.push({
-            id: `done-${task.id}`,
-            title: 'Task Completed',
-            message: `Well done! You finished "${task.title}".`,
-            timestamp: 'Great job!',
-            icon: 'checkmark.circle.fill',
-            color: '#48BB78',
-            read: true
-        });
-    });
-
-    // Add static ones for filler if empty
-    if (list.length === 0) {
-      list.push({
-        id: 'welcome',
-        title: 'Welcome to SRMS',
-        message: 'Your tasks are now synced with Appwrite Cloud.',
-        timestamp: 'Just now',
-        icon: 'checkmark.circle.fill',
-        color: '#48BB78',
-        read: true,
-      });
+  const getIconConfig = (type: string) => {
+    switch (type) {
+      case 'urgent':
+        return { name: 'exclamationmark.triangle.fill' as any, color: '#E53E3E' };
+      case 'warning':
+        return { name: 'clock.fill' as any, color: '#D69E2E' };
+      case 'smart':
+        return { name: 'robot.fill' as any, color: '#4A5568' };
+      case 'success':
+        return { name: 'checkmark.circle.fill' as any, color: '#48BB78' };
+      default:
+        return { name: 'bell.fill' as any, color: '#4299E1' };
     }
+  };
 
-    return list;
-  }, [tasks]);
+  const renderNotification = ({ item }: { item: any }) => {
+    const config = getIconConfig(item.type);
+    
+    return (
+      <TouchableOpacity
+        style={[
+          styles.notificationCard,
+          item.unread && styles.unreadNotification,
+        ]}
+        activeOpacity={0.7}
+        onPress={() => item.unread && markNotifAsRead(item.id)}
+      >
+        <View style={[styles.iconBox, { backgroundColor: config.color + '20' }]}>
+          <IconSymbol size={24} name={config.name} color={config.color} />
+        </View>
 
-  const renderNotification = ({ item }: { item: Notification }) => (
-    <TouchableOpacity
-      style={[
-        styles.notificationCard,
-        !item.read && styles.unreadNotification,
-      ]}
-      activeOpacity={0.7}
-    >
-      <View style={[styles.iconBox, { backgroundColor: item.color + '20' }]}>
-        <IconSymbol size={24} name={item.icon} color={item.color} />
-      </View>
+        <View style={styles.notificationContent}>
+          <View style={styles.notifHeader}>
+            <Text style={styles.notificationTitle}>{item.title}</Text>
+            <TouchableOpacity onPress={() => deleteNotification(item.id)}>
+               <IconSymbol size={16} name="xmark" color="#999" />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.notificationMessage} numberOfLines={2}>
+            {item.body}
+          </Text>
+          <View style={styles.footerRow}>
+            <Text style={styles.tagText}>{item.tag}</Text>
+            <Text style={styles.timestamp}>{item.time}</Text>
+          </View>
+        </View>
 
-      <View style={styles.notificationContent}>
-        <Text style={styles.notificationTitle}>{item.title}</Text>
-        <Text style={styles.notificationMessage} numberOfLines={1}>
-          {item.message}
-        </Text>
-        <Text style={styles.timestamp}>{item.timestamp}</Text>
-      </View>
-
-      {!item.read && <View style={styles.unreadBadge} />}
-    </TouchableOpacity>
-  );
+        {item.unread && <View style={styles.unreadBadge} />}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -117,20 +82,34 @@ export default function NotificationsScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Notifications</Text>
-        <TouchableOpacity>
-          <IconSymbol size={24} name="ellipsis" color="#FFFFFF" />
+        <View>
+          <Text style={styles.title}>Notifications</Text>
+          <Text style={styles.subtitle}>
+            {notifications.filter(n => n.unread).length} Unread Messages
+          </Text>
+        </View>
+        <TouchableOpacity onPress={markAllNotifsAsRead}>
+          <Text style={styles.clearAllText}>Mark all as read</Text>
         </TouchableOpacity>
       </View>
 
       {/* Notifications List */}
       <FlatList
-        data={dynamicNotifications}
+        data={notifications}
         renderItem={renderNotification}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          !isSyncing ? (
+            <View style={styles.emptyContainer}>
+              <IconSymbol size={64} name="bell.slash" color="#FFFFFF40" />
+              <Text style={styles.emptyText}>No notifications yet</Text>
+              <Text style={styles.emptySub}>Your task alerts will appear here</Text>
+            </View>
+          ) : null
+        }
       />
     </SafeAreaView>
   );
@@ -153,9 +132,20 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#FFFFFF',
   },
+  subtitle: {
+    fontSize: 14,
+    color: '#FFFFFF80',
+    marginTop: 2,
+  },
+  clearAllText: {
+    color: '#4299E1',
+    fontWeight: '600',
+    fontSize: 14,
+  },
   listContent: {
     paddingHorizontal: 16,
     paddingBottom: 20,
+    flexGrow: 1,
   },
   notificationCard: {
     flexDirection: 'row',
@@ -164,11 +154,16 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   unreadNotification: {
-    backgroundColor: '#F5F5F7',
+    backgroundColor: '#F0F4FF',
     borderLeftWidth: 4,
-    borderLeftColor: '#0A0A5C',
+    borderLeftColor: '#4299E1',
   },
   iconBox: {
     width: 48,
@@ -181,26 +176,68 @@ const styles = StyleSheet.create({
   notificationContent: {
     flex: 1,
   },
+  notifHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
   notificationTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#1a1a1a',
-    marginBottom: 2,
+    flex: 1,
   },
   notificationMessage: {
     fontSize: 13,
-    color: '#666',
-    marginBottom: 4,
+    color: '#4A4A4A',
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  tagText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#4299E1',
+    backgroundColor: '#4299E115',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
   timestamp: {
     fontSize: 11,
     color: '#999',
   },
   unreadBadge: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#0A0A5C',
-    marginLeft: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4299E1',
+    position: 'absolute',
+    top: 14,
+    right: 8,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginTop: 16,
+  },
+  emptySub: {
+    fontSize: 14,
+    color: '#FFFFFF80',
+    marginTop: 8,
+    textAlign: 'center',
   },
 });

@@ -1,18 +1,19 @@
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/auth';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 export default function LoginScreen() {
@@ -31,6 +32,8 @@ export default function LoginScreen() {
     setIsLoading(true);
     try {
       await login(email.trim(), password);
+      // Navigation is now handled by the RootLayoutNav in _layout.tsx based on the user state.
+      // But we can also add a router.replace here to be safe and force it.
       router.replace('/(tabs)');
     } catch (error: any) {
       Alert.alert('Login Failed', error?.message || 'Something went wrong');
@@ -40,149 +43,198 @@ export default function LoginScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
       >
-        <ThemedView style={styles.inner}>
-          <View style={styles.card}>
-          <View style={styles.header}>
-            <ThemedText type="title" style={styles.title}>SRMS</ThemedText>
-            <ThemedText style={styles.subtitle}>Student Resource Management System</ThemedText>
-          </View>
-
-          <View style={styles.form}>
-            <ThemedText style={styles.label}>Email</ThemedText>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor="#999"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-
-            <ThemedText style={styles.label}>Password</ThemedText>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your password"
-              placeholderTextColor="#999"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
-
-            <TouchableOpacity
-              style={[styles.button, isLoading && styles.buttonDisabled]}
-              onPress={handleLogin}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <ThemedText style={styles.buttonText}>Login</ThemedText>
-              )}
-            </TouchableOpacity>
-
-            <View style={styles.footer}>
-              <ThemedText>{"Don't have an account? "}</ThemedText>
-              <Link href="/register" asChild>
-                <TouchableOpacity>
-                  <ThemedText style={styles.link}>Register</ThemedText>
-                </TouchableOpacity>
-              </Link>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          bounces={false}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Top Blue Header Section */}
+          <View style={styles.headerSection}>
+            <View style={styles.logoWrapper}>
+              <Image
+                source={require('@/assets/images/Asset 3@2x-8.png')}
+                style={styles.logoImage}
+              />
             </View>
           </View>
-          </View>
-        </ThemedView>
 
-      </ScrollView>
-    </KeyboardAvoidingView>
+          {/* White Bottom Sheet/Card */}
+          <View style={styles.formCard}>
+            <View style={styles.welcomeHeader}>
+              <ThemedText style={styles.welcomeText}>Welcome back 👋</ThemedText>
+              <ThemedText style={styles.signInText}>Sign in to continue</ThemedText>
+            </View>
+
+            <View style={styles.inputContainer}>
+              <ThemedText style={styles.inputLabel}>EMAIL</ThemedText>
+              <TextInput
+                style={styles.textInput}
+                placeholder="you@university.edu"
+                placeholderTextColor="#A0AEC0"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+
+              <ThemedText style={styles.inputLabel}>PASSWORD</ThemedText>
+              <TextInput
+                style={styles.textInput}
+                placeholder="........"
+                placeholderTextColor="#A0AEC0"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+
+              <TouchableOpacity
+                style={[styles.loginBtn, isLoading && { opacity: 0.8 }]}
+                onPress={handleLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <ThemedText style={styles.loginBtnText}>Login →</ThemedText>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.footerRow}>
+                <ThemedText style={styles.footerNormalText}>Don't have an account? </ThemedText>
+                <Link href="/register" asChild>
+                  <TouchableOpacity>
+                    <ThemedText style={styles.footerLinkText}>Register</ThemedText>
+                  </TouchableOpacity>
+                </Link>
+              </View>
+
+              <View style={styles.footerRow}>
+                <ThemedText style={styles.footerNormalText}>Are you an admin/counciler? </ThemedText>
+                <Link href="/admin-register" asChild>
+                  <TouchableOpacity>
+                    <ThemedText style={styles.footerLinkText}>Admin Register</ThemedText>
+                  </TouchableOpacity>
+                </Link>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#1C3165',
   },
   scrollContent: {
     flexGrow: 1,
   },
-  inner: {
-    flex: 1,
+
+  headerSection: {
+    height: 320,
     justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#0A0A5C',
-  },
-  header: {
     alignItems: 'center',
-    marginBottom: 45,
+    backgroundColor: '#1C3165',
   },
-  title: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#0a7ea4',
-  },
-  subtitle: {
-    fontSize: 14,
-    marginTop: 8,
-    opacity: 0.7,
-  },
-  form: {
-    gap: 8,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 8,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    color: '#333',
-  },
-  button: {
-    backgroundColor: '#0a7ea4',
-    padding: 16,
-    borderRadius: 12,
+  logoWrapper: {
     alignItems: 'center',
-    marginTop: 24,
+    justifyContent: 'center',
   },
-  buttonDisabled: {
-    opacity: 0.6,
+  logoImage: {
+    width: 140,
+    height: 140,
+    resizeMode: 'contain',
+    marginBottom: 12,
   },
-  buttonText: {
-    color: '#fff',
+  logoSubText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    marginTop: -10,
+    opacity: 0.9,
+  },
+
+  formCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 50, // රූපයේ පරිදි ලොකු වටකුරු දාර
+    borderTopRightRadius: 50,
+    paddingHorizontal: 30,
+    paddingTop: 45,
+    paddingBottom: 40,
+    minHeight: 500,
+  },
+  welcomeHeader: {
+    marginBottom: 40,
+  },
+  welcomeText: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1A202C',
+  },
+  signInText: {
     fontSize: 16,
-    fontWeight: '600',
+    color: '#718096',
+    marginTop: 5,
+    fontWeight: '500',
   },
-  footer: {
+  inputContainer: {
+    width: '100%',
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#1A202C',
+    marginBottom: 8,
+    marginTop: 20,
+  },
+  textInput: {
+    backgroundColor: '#F1F5F9', // ලා නිල්/අළු පාට පසුබිම
+    borderRadius: 16,
+    padding: 18,
+    fontSize: 16,
+    color: '#1A202C',
+  },
+  loginBtn: {
+    backgroundColor: '#1C3165',
+    borderRadius: 18,
+    padding: 20,
+    alignItems: 'center',
+    marginTop: 40,
+    // Shadow (iOS/Android)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  loginBtnText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: 30,
   },
-  link: {
-    color: '#0a7ea4',
-    fontWeight: '600',
+  footerNormalText: {
+    color: '#718096',
+    fontSize: 14,
   },
-  card: {
-    backgroundColor: '#0A0A5C',
-    width: 'auto',
-    height: 'auto',
-    borderRadius: 40,
-    padding: 25,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 50,
+  footerLinkText: {
+    color: '#1C3165',
+    fontSize: 14,
+    fontWeight: '700',
   },
 });

@@ -1,6 +1,7 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useTaskManager, TaskItem } from '@/context/task-manager';
 import { Stack } from 'expo-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   FlatList,
   SafeAreaView,
@@ -20,46 +21,72 @@ interface Notification {
   read: boolean;
 }
 
-const notifications: Notification[] = [
-  {
-    id: '1',
-    title: 'Task Reminder',
-    message: 'You have an upcoming assignment due tomorrow',
-    timestamp: '2 hours ago',
-    icon: 'checkmark.circle.fill',
-    color: '#0A0A5C',
-    read: false,
-  },
-  {
-    id: '2',
-    title: 'Kuppi Session',
-    message: 'New study group session scheduled for Friday',
-    timestamp: '4 hours ago',
-    icon: 'person.2.fill',
-    color: '#D4A5C5',
-    read: false,
-  },
-  {
-    id: '3',
-    title: 'Wellbeing Check-in',
-    message: 'How are you feeling today?',
-    timestamp: '1 day ago',
-    icon: 'heart.fill',
-    color: '#E8B4A8',
-    read: true,
-  },
-  {
-    id: '4',
-    title: 'Feedback Response',
-    message: 'You received new feedback on your submission',
-    timestamp: '2 days ago',
-    icon: 'bubble.right.fill',
-    color: '#C4B5AB',
-    read: true,
-  },
-];
-
 export default function NotificationsScreen() {
+  const { tasks } = useTaskManager();
+
+  const dynamicNotifications: Notification[] = useMemo(() => {
+    const list: Notification[] = [];
+    const now = new Date();
+
+    tasks.forEach((task: TaskItem) => {
+      if (task.deadline) {
+        // Attempt to parse deadline. Format might be "YYYY-MM-DD HH:MM" or ISO
+        const d = new Date(task.deadline);
+        const diffHours = (d.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+        if (diffHours < 0 && task.progress < 100) {
+          list.push({
+            id: `overdue-${task.id}`,
+            title: 'Overdue Task',
+            message: `"${task.title}" was due at ${task.deadline.split('T')[0]}`,
+            timestamp: 'Action required',
+            icon: 'exclamationmark.triangle.fill',
+            color: '#E53E3E',
+            read: false,
+          });
+        } else if (diffHours > 0 && diffHours < 24) {
+          list.push({
+            id: `upcoming-${task.id}`,
+            title: 'Upcoming Deadline',
+            message: `"${task.title}" is due soon!`,
+            timestamp: 'In less than 24h',
+            icon: 'clock.fill',
+            color: '#D69E2E',
+            read: false,
+          });
+        }
+      }
+    });
+
+    // Add completion notifications if any tasks are 100%
+    tasks.filter(t => t.progress === 100).slice(0, 3).forEach(task => {
+        list.push({
+            id: `done-${task.id}`,
+            title: 'Task Completed',
+            message: `Well done! You finished "${task.title}".`,
+            timestamp: 'Great job!',
+            icon: 'checkmark.circle.fill',
+            color: '#48BB78',
+            read: true
+        });
+    });
+
+    // Add static ones for filler if empty
+    if (list.length === 0) {
+      list.push({
+        id: 'welcome',
+        title: 'Welcome to SRMS',
+        message: 'Your tasks are now synced with Appwrite Cloud.',
+        timestamp: 'Just now',
+        icon: 'checkmark.circle.fill',
+        color: '#48BB78',
+        read: true,
+      });
+    }
+
+    return list;
+  }, [tasks]);
+
   const renderNotification = ({ item }: { item: Notification }) => (
     <TouchableOpacity
       style={[
@@ -92,13 +119,13 @@ export default function NotificationsScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Notifications</Text>
         <TouchableOpacity>
-          <IconSymbol size={24} name="ellipsis" color="#1a1a1a" />
+          <IconSymbol size={24} name="ellipsis" color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
       {/* Notifications List */}
       <FlatList
-        data={notifications}
+        data={dynamicNotifications}
         renderItem={renderNotification}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
@@ -124,7 +151,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#FFFFFF',
   },
   listContent: {
     paddingHorizontal: 16,

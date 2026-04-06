@@ -1,375 +1,254 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import {
   type TaskCategory,
-  type TaskItem,
   type TaskType,
   useTaskManager,
 } from '@/context/task-manager';
 import { Stack, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
-  FlatList,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 const taskTypes: TaskType[] = ['Assignment', 'Lab', 'Quiz', 'Study'];
 const categories: TaskCategory[] = ['Individual', 'Group', 'Revision'];
-
-type ViewMode = 'list' | 'card' | 'module';
-type SortMode = 'date' | 'module' | 'alpha';
+const priorities = [
+  { label: 'Low', color: '#48BB78', bg: '#F0FFF4' },
+  { label: 'Medium', color: '#D69E2E', bg: '#FFFAF0' },
+  { label: 'High', color: '#E53E3E', bg: '#FFF5F5' },
+];
 
 export default function TasksScreen() {
-  const { modules, tasks, createTask } = useTaskManager();
+  const { modules, createTask, isSyncing } = useTaskManager();
   const router = useRouter();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<TaskType>('Assignment');
-  const [moduleName, setModuleName] = useState(modules[0]);
-  const [selectedCategories, setSelectedCategories] = useState<TaskCategory[]>(['Individual']);
-  const [deadline, setDeadline] = useState('');
-  const [linkInput, setLinkInput] = useState('');
-  const [fileInput, setFileInput] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
-  const [search, setSearch] = useState('');
-  const [filterModule, setFilterModule] = useState('All');
-  const [filterType, setFilterType] = useState<'All' | TaskType>('All');
-  const [filterCategory, setFilterCategory] = useState<'All' | TaskCategory>('All');
-  const [sortMode, setSortMode] = useState<SortMode>('date');
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const modulesByYear: Record<string, string[]> = {
+    '1st Year': [
+      'Introduction to Programming',
+      'Mathematics for Computing',
+      'Communication Skills',
+      'Introduction to Computer System',
+      'Information System & Data Modeling',
+      'Internet & Web Technologies',
+      'English for Academic Purpose',
+      'Object Oriented Concept'
+    ],
+    '2nd Year': [
+      'Operating Systems and System Administration',
+      'Computer Networks',
+      'Database Management Systems',
+      'Object Oriented Programming',
+      'Software Engineering',
+      'Probability & Statistics',
+      'Employability Skills Development',
+      'Professional Skills',
+      'IT Project',
+      'Data Structures & Algorithms',
+      'Mobile Application Development'
+    ],
+    '3rd Year': [
+      'Employability Skills Development - Seminar',
+      'IT Project Management',
+      'Programming Applications and Frameworks',
+      'Database Systems',
+      'Network Design and Management',
+      'Business Management for IT',
+      'Data Science & Analytics',
+      'Information Assurance & Security',
+      'Human Computer Interaction'
+    ]
+  };
+  const [selectedYear, setSelectedYear] = useState<string>('1st Year');
+  const [moduleName, setModuleName] = useState(modules[0] || 'OOP');
+  const [selectedCategory, setSelectedCategory] = useState<TaskCategory>('Individual');
+  const [deadlineDate, setDeadlineDate] = useState('');
+  const [deadlineTime, setDeadlineTime] = useState('');
+  const [priority, setPriority] = useState('Medium');
 
-  const filteredTasks = useMemo(() => {
-    let data = [...tasks];
-
-    if (filterModule !== 'All') {
-      data = data.filter((task) => task.module === filterModule);
-    }
-
-    if (filterType !== 'All') {
-      data = data.filter((task) => task.type === filterType);
-    }
-
-    if (filterCategory !== 'All') {
-      data = data.filter((task) => task.categories.includes(filterCategory));
-    }
-
-    const keyword = search.trim().toLowerCase();
-    if (keyword) {
-      data = data.filter(
-        (task) =>
-          task.title.toLowerCase().includes(keyword) ||
-          task.description.toLowerCase().includes(keyword) ||
-          task.module.toLowerCase().includes(keyword)
-      );
-    }
-
-    if (sortMode === 'alpha') {
-      data.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortMode === 'module') {
-      data.sort((a, b) => a.module.localeCompare(b.module));
-    } else {
-      data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    }
-
-    return data;
-  }, [tasks, filterModule, filterType, filterCategory, search, sortMode]);
-
-  const groupedByModule = useMemo(() => {
-    return filteredTasks.reduce<Record<string, TaskItem[]>>((acc, task) => {
-      if (!acc[task.module]) acc[task.module] = [];
-      acc[task.module].push(task);
-      return acc;
-    }, {});
-  }, [filteredTasks]);
-
-  function toggleCategory(category: TaskCategory) {
-    setSelectedCategories((prev) => {
-      if (prev.includes(category)) {
-        const next = prev.filter((item) => item !== category);
-        return next.length ? next : ['Individual'];
-      }
-      return [...prev, category];
-    });
-  }
-
-  function submitTask() {
+  async function submitTask() {
     if (!title.trim()) {
       Alert.alert('Missing title', 'Please add a task title.');
       return;
     }
 
-    createTask({
-      title,
-      description,
-      type,
-      categories: selectedCategories,
-      module: moduleName,
-      deadline: deadline.trim() || undefined,
-      links: linkInput
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
-      files: fileInput
-        .split(',')
-        .map((item) => item.trim())
-        .filter(Boolean),
-    });
+    setIsCreating(true);
+    try {
+      const newTaskId = await createTask({
+        title,
+        description,
+        type,
+        categories: [selectedCategory],
+        module: moduleName,
+        deadline: `${deadlineDate} ${deadlineTime}`.trim() || undefined,
+        priority: priority,
+      });
 
-    setTitle('');
-    setDescription('');
-    setType('Assignment');
-    setModuleName(modules[0]);
-    setSelectedCategories(['Individual']);
-    setDeadline('');
-    setLinkInput('');
-    setFileInput('');
-    Alert.alert('Task created', 'Your new task was added successfully.');
+      setTitle('');
+      setDescription('');
+
+      // Navigate to the newly created task's full details page
+      router.push(`/(tabs)/task-details?id=${newTaskId}`);
+    } catch (e) {
+      Alert.alert('Error', 'Failed to create task. Please try again.');
+    } finally {
+      setIsCreating(false);
+    }
   }
 
-  function renderTaskCard(task: TaskItem) {
+  if (isSyncing) {
     return (
-      <View style={styles.taskCard}>
-        <View style={styles.taskHeaderRow}>
-          <Text style={styles.taskTitle}>{task.title}</Text>
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{task.type}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.taskMeta}>ID: {task.id}</Text>
-        <Text style={styles.taskMeta}>Module: {task.module}</Text>
-        <Text style={styles.taskMeta}>Categories: {task.categories.join(', ')}</Text>
-        <Text style={styles.taskMeta}>Created: {new Date(task.createdAt).toLocaleString()}</Text>
-        <Text style={styles.taskMeta}>Updated: {new Date(task.updatedAt).toLocaleString()}</Text>
-        {!!task.description && <Text style={styles.taskDescription}>{task.description}</Text>}
-
-        {!!task.attachments.links.length && (
-          <Text style={styles.taskMeta}>Links: {task.attachments.links.join(' | ')}</Text>
-        )}
-
-        {!!task.attachments.files.length && (
-          <Text style={styles.taskMeta}>Files: {task.attachments.files.join(', ')}</Text>
-        )}
-      </View>
+      <SafeAreaView style={[styles.safeArea, { justifyContent: 'center', alignItems: 'center' }]}>
+         <ActivityIndicator size="large" color="#1C3165" />
+         <Text style={{ marginTop: 10, color: '#1C3165', fontWeight: '600' }}>Syncing with Appwrite...</Text>
+      </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <FlatList
-        data={viewMode === 'module' ? [] : filteredTasks}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <View>
-            <View style={styles.topStripWrap}>
-              <View style={styles.topStripCard}>
-                <TouchableOpacity
-                  style={styles.topStripIconBtn}
-                  activeOpacity={0.85}
-                  onPress={() => router.push('/(tabs)/task-insights')}>
-                  <IconSymbol size={24} name="chevron.left" color="#65707D" />
-                </TouchableOpacity>
+      {/* Header Area */}
+      <View style={styles.headerRow}>
+        <TouchableOpacity style={styles.headerBtn} onPress={() => router.push('/(tabs)/task-insights')}>
+          <IconSymbol size={18} name="chevron.left" color="#1C3165" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Tasks</Text>
+        <View style={{ width: 45 }} />
+      </View>
 
-                <Text style={styles.topStripTitle}>Tasks</Text>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <Text style={styles.pageMainTitle}>Task Creation & Organization</Text>
 
-                <TouchableOpacity
-                  style={styles.topStripIconBtn}
-                  activeOpacity={0.85}
-                  onPress={() => router.push('/(tabs)/notifications')}>
-                  <IconSymbol size={22} name="bell.fill" color="#18326E" />
-                  <View style={styles.notifyDot} />
-                </TouchableOpacity>
-              </View>
-            </View>
+        <View style={styles.formCard}>
+          <Text style={styles.sectionLabel}>Create Task</Text>
 
-            <Text style={styles.pageTitle}>Task Creation & Organization</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Task title"
+            placeholderTextColor="#A0AEC0"
+            value={title}
+            onChangeText={setTitle}
+          />
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Create Task</Text>
-              <TextInput style={styles.input} placeholder="Task title" value={title} onChangeText={setTitle} />
-              <TextInput
-                style={[styles.input, styles.multiInput]}
-                placeholder="Description"
-                value={description}
-                onChangeText={setDescription}
-                multiline
-              />
+          <TextInput
+            style={[styles.input, styles.multiInput]}
+            placeholder="Description..."
+            placeholderTextColor="#A0AEC0"
+            value={description}
+            onChangeText={setDescription}
+            multiline
+          />
 
-              <Text style={styles.label}>Task Type</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.rowScroll}>
-                {taskTypes.map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    style={[styles.chip, type === item && styles.chipActive]}
-                    onPress={() => setType(item)}>
-                    <Text style={[styles.chipText, type === item && styles.chipTextActive]}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <Text style={styles.label}>Module/Course (dropdown style)</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.rowScroll}>
-                {modules.map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    style={[styles.chip, moduleName === item && styles.chipActive]}
-                    onPress={() => setModuleName(item)}>
-                    <Text style={[styles.chipText, moduleName === item && styles.chipTextActive]}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <Text style={styles.label}>Categories (multi-select)</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.rowScroll}>
-                {categories.map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    style={[styles.chip, selectedCategories.includes(item) && styles.chipActive]}
-                    onPress={() => toggleCategory(item)}>
-                    <Text
-                      style={[
-                        styles.chipText,
-                        selectedCategories.includes(item) && styles.chipTextActive,
-                      ]}>
-                      {item}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Deadline (YYYY-MM-DDTHH:mm:ssZ)"
-                value={deadline}
-                onChangeText={setDeadline}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Attachment links (comma separated)"
-                value={linkInput}
-                onChangeText={setLinkInput}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Attachment file names (comma separated)"
-                value={fileInput}
-                onChangeText={setFileInput}
-              />
-
-              <TouchableOpacity style={styles.primaryButton} onPress={submitTask}>
-                <Text style={styles.primaryButtonText}>Create Task</Text>
+          <Text style={styles.fieldLabel}>TASK TYPE</Text>
+          <View style={styles.chipRow}>
+            {taskTypes.map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={[styles.chip, type === item && styles.chipActive]}
+                onPress={() => setType(item)}>
+                <Text style={[styles.chipText, type === item && styles.chipTextActive]}>{item}</Text>
               </TouchableOpacity>
-            </View>
-
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Task Organization</Text>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Search by task name or keyword"
-                value={search}
-                onChangeText={setSearch}
-              />
-
-              <Text style={styles.label}>Filter by Module</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.rowScroll}>
-                {['All', ...modules].map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    style={[styles.chip, filterModule === item && styles.chipActive]}
-                    onPress={() => setFilterModule(item)}>
-                    <Text style={[styles.chipText, filterModule === item && styles.chipTextActive]}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <Text style={styles.label}>Filter by Type</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.rowScroll}>
-                {(['All', ...taskTypes] as const).map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    style={[styles.chip, filterType === item && styles.chipActive]}
-                    onPress={() => setFilterType(item)}>
-                    <Text style={[styles.chipText, filterType === item && styles.chipTextActive]}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <Text style={styles.label}>Filter by Category</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.rowScroll}>
-                {(['All', ...categories] as const).map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    style={[styles.chip, filterCategory === item && styles.chipActive]}
-                    onPress={() => setFilterCategory(item)}>
-                    <Text style={[styles.chipText, filterCategory === item && styles.chipTextActive]}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              <Text style={styles.label}>Sorting</Text>
-              <View style={styles.rowWrap}>
-                {(['date', 'module', 'alpha'] as SortMode[]).map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    style={[styles.chip, sortMode === item && styles.chipActive]}
-                    onPress={() => setSortMode(item)}>
-                    <Text style={[styles.chipText, sortMode === item && styles.chipTextActive]}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <Text style={styles.label}>Task List Views</Text>
-              <View style={styles.rowWrap}>
-                {(['list', 'card', 'module'] as ViewMode[]).map((item) => (
-                  <TouchableOpacity
-                    key={item}
-                    style={[styles.chip, viewMode === item && styles.chipActive]}
-                    onPress={() => setViewMode(item)}>
-                    <Text style={[styles.chipText, viewMode === item && styles.chipTextActive]}>{item}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-
-            {viewMode === 'module' && (
-              <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Module-wise Grouped View</Text>
-                {Object.keys(groupedByModule).length === 0 && (
-                  <Text style={styles.emptyText}>No tasks found for current filters.</Text>
-                )}
-                {Object.entries(groupedByModule).map(([module, moduleTasks]) => (
-                  <View key={module} style={styles.groupBlock}>
-                    <Text style={styles.groupTitle}>{module}</Text>
-                    {moduleTasks.map((task) => (
-                      <View key={task.id}>{renderTaskCard(task)}</View>
-                    ))}
-                  </View>
-                ))}
-              </View>
-            )}
+            ))}
           </View>
-        }
-        renderItem={({ item }) => {
-          if (viewMode === 'list' || viewMode === 'card') {
-            return renderTaskCard(item);
-          }
-          return null;
-        }}
-        ListEmptyComponent={
-          viewMode !== 'module' ? <Text style={styles.emptyText}>No tasks found for current filters.</Text> : null
-        }
-        contentContainerStyle={styles.content}
-      />
+
+          <Text style={styles.fieldLabel}>YEAR</Text>
+          <View style={styles.chipRow}>
+            {Object.keys(modulesByYear).map((year) => (
+              <TouchableOpacity
+                key={year}
+                style={[styles.chip, selectedYear === year && styles.chipActive]}
+                onPress={() => {
+                  setSelectedYear(year);
+                  setModuleName(modulesByYear[year][0]); // Auto-select first module of new year
+                }}>
+                <Text style={[styles.chipText, selectedYear === year && styles.chipTextActive]}>{year}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text style={styles.fieldLabel}>MODULE / COURSE</Text>
+          <View style={styles.chipRow}>
+            {modulesByYear[selectedYear].map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={[styles.chip, moduleName === item && styles.chipActive]}
+                onPress={() => setModuleName(item)}>
+                <Text style={[styles.chipText, moduleName === item && styles.chipTextActive]}>{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text style={styles.fieldLabel}>CATEGORIES</Text>
+          <View style={styles.chipRow}>
+            {categories.map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={[styles.chip, selectedCategory === item && styles.chipActive]}
+                onPress={() => setSelectedCategory(item)}>
+                <Text style={[styles.chipText, selectedCategory === item && styles.chipTextActive]}>{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text style={styles.fieldLabel}>DEADLINE</Text>
+          <View style={styles.deadlineRow}>
+            <TextInput
+              style={[styles.input, { flex: 2, marginBottom: 0 }]}
+              placeholder="YYYY-MM-DD"
+              value={deadlineDate}
+              onChangeText={setDeadlineDate}
+            />
+            <TextInput
+              style={[styles.input, { flex: 1, marginBottom: 0 }]}
+              placeholder="HH:MM"
+              value={deadlineTime}
+              onChangeText={setDeadlineTime}
+            />
+          </View>
+
+          <Text style={styles.fieldLabel}>PRIORITY</Text>
+          <View style={styles.chipRow}>
+            {priorities.map((p) => (
+              <TouchableOpacity
+                key={p.label}
+                style={[
+                  styles.priorityChip,
+                  { backgroundColor: p.bg, borderColor: p.color },
+                  priority === p.label && { borderWidth: 2 }
+                ]}
+                onPress={() => setPriority(p.label)}>
+                <Text style={[styles.priorityText, { color: p.color }]}>{p.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <TouchableOpacity 
+            style={[styles.createButton, isCreating && { opacity: 0.7 }]} 
+            onPress={submitTask}
+            disabled={isCreating}
+          >
+            {isCreating ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.createButtonText}>Create Task →</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -377,185 +256,158 @@ export default function TasksScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0A5C',
+    backgroundColor: '#F7FAFC',
   },
-  content: {
-    padding: 16,
-    paddingBottom: 120,
-    gap: 12,
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
   },
-  topStripWrap: {
-    height: 84,
-    marginHorizontal: -16,
-    marginBottom: 8,
-    backgroundColor: '#0A0A5C',
-    justifyContent: 'center',
-    paddingHorizontal: 14,
+  backgroundImage: {
+    opacity: 0.95,
+    resizeMode: 'cover',
   },
-  topStripCard: {
-    height: 56,
-    borderRadius: 28,
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 14,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
   },
-  topStripIconBtn: {
-    padding: 10,
-    borderRadius: 17,
-    backgroundColor: '#FFFFFF',
+  headerBtn: {
+    width: 45,
+    height: 45,
+    borderRadius: 14,
+    backgroundColor: '#EBF4FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  topStripTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1F2A38',
-    letterSpacing: 0.3,
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1A202C',
+  },
+  bellBtn: {
+    width: 45,
+    height: 45,
+    borderRadius: 14,
+    backgroundColor: '#EBF4FF',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   notifyDot: {
     position: 'absolute',
-    right: 6,
-    top: 6,
+    top: 12,
+    right: 12,
     width: 8,
     height: 8,
-    borderRadius: 5,
-    backgroundColor: '#FF5A5A',
+    borderRadius: 4,
+    backgroundColor: '#FF4D4D',
   },
-  pageTitle: {
-    fontSize: 24,
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  pageMainTitle: {
+    fontSize: 26,
     fontWeight: '800',
-    color: '#1a1a1a',
-    marginBottom: 10,
+    color: '#1C3165',
+    marginBottom: 20,
+    marginTop: 10,
   },
-  section: {
-    backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 14,
-    marginBottom: 14,
+  formCard: {
+    backgroundColor: 'transparent',
+    borderRadius: 25,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#EDF2F7',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  sectionTitle: {
-    fontSize: 17,
+  sectionLabel: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1C3165',
+    marginBottom: 15,
+  },
+  fieldLabel: {
+    fontSize: 12,
     fontWeight: '700',
-    color: '#2D5A7B',
-    marginBottom: 10,
+    color: '#718096',
+    marginTop: 15,
+    marginBottom: 8,
   },
-  label: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 8,
-    marginBottom: 6,
+  yearSubLabel: {
+    fontSize: 11,
     fontWeight: '600',
+    color: '#A0AEC0',
+    marginBottom: 8,
+    marginTop: 5,
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#e2e2e2',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 8,
-    color: '#1a1a1a',
-    backgroundColor: '#fafafa',
+    backgroundColor: '#EDF2F7',
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: '#2D3748',
+    marginBottom: 10,
   },
   multiInput: {
-    minHeight: 80,
+    height: 100,
     textAlignVertical: 'top',
   },
-  rowScroll: {
-    marginBottom: 8,
-  },
-  rowWrap: {
+  chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
   chip: {
     borderWidth: 1,
-    borderColor: '#e5e5e5',
-    backgroundColor: '#f7f7f7',
-    borderRadius: 999,
-    paddingHorizontal: 12,
+    borderColor: '#E2E8F0',
+    borderRadius: 20,
+    paddingHorizontal: 16,
     paddingVertical: 8,
-    marginRight: 8,
   },
   chipActive: {
-    backgroundColor: '#0A0A5C',
-    borderColor: '#0A0A5C',
+    backgroundColor: '#1C3165',
+    borderColor: '#1C3165',
   },
   chipText: {
-    color: '#333',
+    fontSize: 13,
     fontWeight: '600',
-    fontSize: 12,
+    color: '#4A5568',
   },
   chipTextActive: {
-    color: '#fff',
+    color: '#FFFFFF',
   },
-  primaryButton: {
-    backgroundColor: '#2D5A7B',
-    borderRadius: 12,
-    alignItems: 'center',
-    paddingVertical: 12,
-    marginTop: 6,
-  },
-  primaryButtonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  taskCard: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#efefef',
-  },
-  taskHeaderRow: {
+  deadlineRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
+    gap: 10,
   },
-  taskTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#1a1a1a',
+  priorityChip: {
     flex: 1,
-    marginRight: 8,
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderWidth: 1,
   },
-  badge: {
-    backgroundColor: '#f0f3ff',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#2D5A7B',
-  },
-  taskMeta: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 2,
-  },
-  taskDescription: {
+  priorityText: {
     fontSize: 13,
-    color: '#2c2c2c',
-    marginTop: 6,
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#666',
-    marginTop: 10,
-  },
-  groupBlock: {
-    marginBottom: 8,
-  },
-  groupTitle: {
-    fontSize: 15,
     fontWeight: '700',
-    color: '#0A0A5C',
-    marginBottom: 6,
+  },
+  createButton: {
+    backgroundColor: '#1C3165',
+    borderRadius: 15,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 25,
+  },
+  createButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
   },
 });

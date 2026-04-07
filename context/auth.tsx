@@ -1,9 +1,12 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { account, databases } from '@/lib/appwrite';
 import { ID, type Models } from 'appwrite';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID || '69aa65950030a8c889da';
 const STUDENTS_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_STUDENTS_COLLECTION_ID || 'students';
+const GRADES_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_GRADES_COLLECTION_ID || 'grades';
+
+export { DATABASE_ID, GRADES_COLLECTION_ID, STUDENTS_COLLECTION_ID };
 
 type StudentData = {
   name: string;

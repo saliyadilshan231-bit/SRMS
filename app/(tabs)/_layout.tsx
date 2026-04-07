@@ -4,16 +4,19 @@ import { StyleSheet } from 'react-native';
 
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useThemeColors } from '@/hooks/useThemeColors';
 
 export default function TabLayout() {
+  const colors = useThemeColors();
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#0A0A5C',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.subtext,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: [styles.tabBar, { backgroundColor: colors.card, borderTopColor: colors.border }],
         tabBarLabelStyle: styles.tabBarLabel,
       }}>
       <Tabs.Screen
@@ -21,6 +24,13 @@ export default function TabLayout() {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={24} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <IconSymbol size={24} name="person.circle.fill" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -55,6 +65,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="notificationHub"
+        options={{
+          href: null,
+          title: 'Notification Hub',
+        }}
+      />
+      <Tabs.Screen
         name="task-insights"
         options={{
           href: null,
@@ -66,6 +83,27 @@ export default function TabLayout() {
         options={{
           href: null,
           title: 'Grade Analyst',
+        }}
+      />
+      <Tabs.Screen
+        name="task-details"
+        options={{
+          href: null,
+          title: 'Task Details',
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color }) => <IconSymbol size={24} name="gear" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="about"
+        options={{
+          title: 'About',
+          tabBarIcon: ({ color }) => <IconSymbol size={24} name="info.circle.fill" color={color} />,
         }}
       />
     </Tabs>

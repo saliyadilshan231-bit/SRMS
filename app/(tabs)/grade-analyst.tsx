@@ -13,9 +13,9 @@ import {
   Modal,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -23,12 +23,13 @@ import {
 const HF_API_KEY = process.env.EXPO_PUBLIC_HF_API_KEY || '';
 
 const gradePoints: Record<string, number> = {
+
   'A+': 4.0, A: 4.0, 'A-': 3.7,
   'B+': 3.3, B: 3.0, 'B-': 2.7,
   'C+': 2.3, C: 2.0, 'C-': 1.7,
   D: 1.0, F: 0,
-};
 
+};
 const gradeOptions = Object.keys(gradePoints);
 const yearOptions = ['1st Year', '2nd Year', '3rd Year', 'Final Year', 'Graduating'];
 
@@ -49,11 +50,12 @@ const revSemesterMap: Record<number, string> = {
 type CourseRow = {
   id: string;
   module: string;
-  credits: string;
+  credits: number;
   grade: string;
   year: string;
   semester: string;
 };
+
 
 function parseNum(value: string) {
   if (!value) return 0;
@@ -61,12 +63,14 @@ function parseNum(value: string) {
   return Number.isFinite(n) ? n : 0;
 }
 
+
 export default function GradeAnalystScreen() {
   const router = useRouter();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const [currentYear, setCurrentYear] = useState('2nd Year');
   const [currentSemester, setCurrentSemester] = useState('Semester 1');
+
 
   const [aiAdvice, setAiAdvice] = useState('');
   const [loadingAI, setLoadingAI] = useState(false);
@@ -133,16 +137,11 @@ export default function GradeAnalystScreen() {
     return () => pulse.stop();
   }, []);
 
+
   const calc = useMemo(() => {
-    const qualityPoints = rows.reduce((sum, row) => {
-      const credits = parseNum(row.credits);
-      const gp = gradePoints[row.grade] ?? 0;
-      return sum + credits * gp;
-    }, 0);
-
-    const totalCredits = rows.reduce((sum, row) => sum + parseNum(row.credits), 0);
+    const qualityPoints = rows.reduce((sum, row) => sum + row.credits * gradePoints[row.grade], 0);
+    const totalCredits = rows.reduce((sum, row) => sum + row.credits, 0);
     const gpa = totalCredits > 0 ? qualityPoints / totalCredits : 0;
-
     const target = parseNum(targetGpa);
     const future = parseNum(futureCredits);
     const requiredPoints = target * (totalCredits + future) - qualityPoints;
@@ -215,6 +214,7 @@ Use clear bullet points only. Professional and encouraging tone.`;
     } finally {
       setLoadingAI(false);
     }
+
   }
 
   const filteredRows = useMemo(() => {
@@ -281,6 +281,7 @@ Use clear bullet points only. Professional and encouraging tone.`;
     }
   }
 
+
   async function removeRow(id: string) {
     if (!user) return;
 
@@ -323,12 +324,13 @@ Use clear bullet points only. Professional and encouraging tone.`;
       console.error('Failed to update module in Appwrite', e);
       // We could revert the state here if needed, but for now we'll just log
     }
+
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
       <Stack.Screen options={{ headerShown: false }} />
-
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Top Bar */}
         <View style={styles.topBar}>
@@ -641,6 +643,7 @@ Use clear bullet points only. Professional and encouraging tone.`;
         </View>
       </Modal>
     </SafeAreaView>
+
   );
 }
 
@@ -654,6 +657,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     paddingHorizontal: 4,
+
   },
   backBtn: { padding: 8 },
   title: { fontSize: 26, fontWeight: '700', color: '#0F172A', letterSpacing: -0.5 },
@@ -745,6 +749,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
+
   },
   gradeScroll: { flex: 1 },
   gradeChip: {
@@ -901,4 +906,5 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalSubmitText: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
+
 });

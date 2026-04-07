@@ -1,6 +1,7 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useTaskManager, TaskItem } from '@/context/task-manager';
 import { Stack } from 'expo-router';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   FlatList,
   SafeAreaView,
@@ -20,69 +21,60 @@ interface Notification {
   read: boolean;
 }
 
-const notifications: Notification[] = [
-  {
-    id: '1',
-    title: 'Task Reminder',
-    message: 'You have an upcoming assignment due tomorrow',
-    timestamp: '2 hours ago',
-    icon: 'checkmark.circle.fill',
-    color: '#0A0A5C',
-    read: false,
-  },
-  {
-    id: '2',
-    title: 'Kuppi Session',
-    message: 'New study group session scheduled for Friday',
-    timestamp: '4 hours ago',
-    icon: 'person.2.fill',
-    color: '#D4A5C5',
-    read: false,
-  },
-  {
-    id: '3',
-    title: 'Wellbeing Check-in',
-    message: 'How are you feeling today?',
-    timestamp: '1 day ago',
-    icon: 'heart.fill',
-    color: '#E8B4A8',
-    read: true,
-  },
-  {
-    id: '4',
-    title: 'Feedback Response',
-    message: 'You received new feedback on your submission',
-    timestamp: '2 days ago',
-    icon: 'bubble.right.fill',
-    color: '#C4B5AB',
-    read: true,
-  },
-];
-
 export default function NotificationsScreen() {
-  const renderNotification = ({ item }: { item: Notification }) => (
-    <TouchableOpacity
-      style={[
-        styles.notificationCard,
-        !item.read && styles.unreadNotification,
-      ]}
-      activeOpacity={0.7}
-    >
-      <View style={[styles.iconBox, { backgroundColor: item.color + '20' }]}>
-        <IconSymbol size={24} name={item.icon} color={item.color} />
-      </View>
+  const { notifications, markNotifAsRead, deleteNotification, markAllNotifsAsRead, isSyncing } = useTaskManager();
 
-      <View style={styles.notificationContent}>
-        <Text style={styles.notificationTitle}>{item.title}</Text>
-        <Text style={styles.notificationMessage} numberOfLines={1}>
-          {item.message}
-        </Text>
-        <Text style={styles.timestamp}>{item.timestamp}</Text>
-      </View>
+  const getIconConfig = (type: string) => {
+    switch (type) {
+      case 'urgent':
+        return { name: 'exclamationmark.triangle.fill' as any, color: '#E53E3E' };
+      case 'warning':
+        return { name: 'clock.fill' as any, color: '#D69E2E' };
+      case 'smart':
+        return { name: 'robot.fill' as any, color: '#4A5568' };
+      case 'success':
+        return { name: 'checkmark.circle.fill' as any, color: '#48BB78' };
+      default:
+        return { name: 'bell.fill' as any, color: '#4299E1' };
+    }
+  };
 
-      {!item.read && <View style={styles.unreadBadge} />}
-    </TouchableOpacity>
-  );
+  const renderNotification = ({ item }: { item: any }) => {
+    const config = getIconConfig(item.type);
+    
+    return (
+      <TouchableOpacity
+        style={[
+          styles.notificationCard,
+          item.unread && styles.unreadNotification,
+        ]}
+        activeOpacity={0.7}
+        onPress={() => item.unread && markNotifAsRead(item.id)}
+      >
+        <View style={[styles.iconBox, { backgroundColor: config.color + '20' }]}>
+          <IconSymbol size={24} name={config.name} color={config.color} />
+        </View>
+
+        <View style={styles.notificationContent}>
+          <View style={styles.notifHeader}>
+            <Text style={styles.notificationTitle}>{item.title}</Text>
+            <TouchableOpacity onPress={() => deleteNotification(item.id)}>
+               <IconSymbol size={16} name="xmark" color="#999" />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.notificationMessage} numberOfLines={2}>
+            {item.body}
+          </Text>
+          <View style={styles.footerRow}>
+            <Text style={styles.tagText}>{item.tag}</Text>
+            <Text style={styles.timestamp}>{item.time}</Text>
+          </View>
+        </View>
+
+        {item.unread && <View style={styles.unreadBadge} />}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -90,9 +82,14 @@ export default function NotificationsScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Notifications</Text>
-        <TouchableOpacity>
-          <IconSymbol size={24} name="ellipsis" color="#1a1a1a" />
+        <View>
+          <Text style={styles.title}>Notifications</Text>
+          <Text style={styles.subtitle}>
+            {notifications.filter(n => n.unread).length} Unread Messages
+          </Text>
+        </View>
+        <TouchableOpacity onPress={markAllNotifsAsRead}>
+          <Text style={styles.clearAllText}>Mark all as read</Text>
         </TouchableOpacity>
       </View>
 
@@ -104,6 +101,15 @@ export default function NotificationsScreen() {
         contentContainerStyle={styles.listContent}
         scrollEnabled={true}
         showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          !isSyncing ? (
+            <View style={styles.emptyContainer}>
+              <IconSymbol size={64} name="bell.slash" color="#FFFFFF40" />
+              <Text style={styles.emptyText}>No notifications yet</Text>
+              <Text style={styles.emptySub}>Your task alerts will appear here</Text>
+            </View>
+          ) : null
+        }
       />
     </SafeAreaView>
   );
@@ -124,11 +130,22 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#FFFFFF',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#FFFFFF80',
+    marginTop: 2,
+  },
+  clearAllText: {
+    color: '#4299E1',
+    fontWeight: '600',
+    fontSize: 14,
   },
   listContent: {
     paddingHorizontal: 16,
     paddingBottom: 20,
+    flexGrow: 1,
   },
   notificationCard: {
     flexDirection: 'row',
@@ -137,11 +154,16 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 14,
     marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   unreadNotification: {
-    backgroundColor: '#F5F5F7',
+    backgroundColor: '#F0F4FF',
     borderLeftWidth: 4,
-    borderLeftColor: '#0A0A5C',
+    borderLeftColor: '#4299E1',
   },
   iconBox: {
     width: 48,
@@ -154,26 +176,68 @@ const styles = StyleSheet.create({
   notificationContent: {
     flex: 1,
   },
+  notifHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
   notificationTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: '#1a1a1a',
-    marginBottom: 2,
+    flex: 1,
   },
   notificationMessage: {
     fontSize: 13,
-    color: '#666',
-    marginBottom: 4,
+    color: '#4A4A4A',
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  tagText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#4299E1',
+    backgroundColor: '#4299E115',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
   timestamp: {
     fontSize: 11,
     color: '#999',
   },
   unreadBadge: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#0A0A5C',
-    marginLeft: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4299E1',
+    position: 'absolute',
+    top: 14,
+    right: 8,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginTop: 16,
+  },
+  emptySub: {
+    fontSize: 14,
+    color: '#FFFFFF80',
+    marginTop: 8,
+    textAlign: 'center',
   },
 });

@@ -1,27 +1,26 @@
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { useAuth } from '@/context/auth';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
-export default function RegisterScreen() {
-  const { register } = useAuth();
+export default function AdminRegisterScreen() {
+  const { adminRegister } = useAuth();
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [role, setRole] = useState('');
   const [gender, setGender] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -49,32 +48,6 @@ export default function RegisterScreen() {
       newErrors.email = 'Please enter a valid email address';
     } else {
       delete newErrors.email;
-    }
-    setErrors(newErrors);
-  };
-
-  const validateDateOfBirth = (value: string) => {
-    const newErrors = { ...errors };
-    if (!value) {
-      newErrors.dateOfBirth = 'Date of birth is required';
-    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-      newErrors.dateOfBirth = 'Format must be YYYY-MM-DD';
-    } else {
-      const dateObj = new Date(value);
-      if (isNaN(dateObj.getTime())) {
-        newErrors.dateOfBirth = 'Please enter a valid date';
-      } else {
-        const today = new Date();
-        const age = today.getFullYear() - dateObj.getFullYear();
-        const monthDiff = today.getMonth() - dateObj.getMonth();
-        const dayDiff = today.getDate() - dateObj.getDate();
-        const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
-        if (actualAge < 16) {
-          newErrors.dateOfBirth = 'You must be at least 16 years old';
-        } else {
-          delete newErrors.dateOfBirth;
-        }
-      }
     }
     setErrors(newErrors);
   };
@@ -117,19 +90,19 @@ export default function RegisterScreen() {
     }
 
     // Validate all fields one more time
-    if (!name || !email || !dateOfBirth || !gender || !password || !confirmPassword) {
+    if (!name || !email || !role || !gender || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
     setIsLoading(true);
     try {
-      const result = await register({
+      const result = await adminRegister({
         name: name.trim(),
         email: email.trim(),
         password,
-        dateOfBirth,
         gender,
+        role,
       });
 
       if (result.verificationEmailSent) {
@@ -164,8 +137,8 @@ export default function RegisterScreen() {
       >
         <View style={styles.inner}>
           <View style={styles.header}>
-            <ThemedText type="title" style={styles.title}>SRMS</ThemedText>
-            <ThemedText style={styles.subtitle}>Create your account</ThemedText>
+            <ThemedText type="title" style={styles.title}>SRMS Admin</ThemedText>
+            <ThemedText style={styles.subtitle}>Create your admin account</ThemedText>
           </View>
 
           <View style={styles.form}>
@@ -199,35 +172,44 @@ export default function RegisterScreen() {
             />
             {errors.email && <ThemedText style={styles.errorText}>{errors.email}</ThemedText>}
 
-            <ThemedText style={styles.label}>Date of Birth</ThemedText>
-            <TextInput
-              style={[styles.input, errors.dateOfBirth && styles.inputError]}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor="#999"
-              value={dateOfBirth}
-              onChangeText={(text) => {
-                setDateOfBirth(text);
-                validateDateOfBirth(text);
-              }}
-              keyboardType="numbers-and-punctuation"
-            />
-            {errors.dateOfBirth && <ThemedText style={styles.errorText}>{errors.dateOfBirth}</ThemedText>}
+            <ThemedText style={styles.label}>Role</ThemedText>
+            <View style={styles.roleContainer}>
+              {['Admin', 'Counciler'].map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[
+                    styles.roleButton,
+                    role === option && styles.roleButtonActive,
+                  ]}
+                  onPress={() => setRole(option)}
+                >
+                  <ThemedText
+                    style={[
+                      styles.roleText,
+                      role === option && styles.roleTextActive,
+                    ]}
+                  >
+                    {option}
+                  </ThemedText>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <ThemedText style={styles.label}>Gender</ThemedText>
-            <View style={styles.genderContainer}>
+            <View style={styles.roleContainer}>
               {['Male', 'Female', 'Other'].map((option) => (
                 <TouchableOpacity
                   key={option}
                   style={[
-                    styles.genderButton,
-                    gender === option && styles.genderButtonActive,
+                    styles.roleButton,
+                    gender === option && styles.roleButtonActive,
                   ]}
                   onPress={() => setGender(option)}
                 >
                   <ThemedText
                     style={[
-                      styles.genderText,
-                      gender === option && styles.genderTextActive,
+                      styles.roleText,
+                      gender === option && styles.roleTextActive,
                     ]}
                   >
                     {option}
@@ -272,7 +254,7 @@ export default function RegisterScreen() {
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <ThemedText style={styles.buttonText}>Register</ThemedText>
+                <ThemedText style={styles.buttonText}>Register Admin</ThemedText>
               )}
             </TouchableOpacity>
 
@@ -298,7 +280,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    backgroundColor: '#1C3165',
   },
   inner: {
     flex: 1,
@@ -309,6 +290,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 36,
+    marginTop: 40,
   },
   title: {
     fontSize: 36,
@@ -367,6 +349,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 24,
+    marginBottom: 40,
   },
   footerText: {
     color: '#FFFFFF',
@@ -376,11 +359,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textDecorationLine: 'underline',
   },
-  genderContainer: {
+  roleContainer: {
     flexDirection: 'row',
     gap: 10,
   },
-  genderButton: {
+  roleButton: {
     flex: 1,
     padding: 12,
     borderRadius: 12,
@@ -389,16 +372,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
   },
-  genderButtonActive: {
+  roleButtonActive: {
     backgroundColor: '#0a7ea4',
     borderColor: '#0a7ea4',
   },
-  genderText: {
+  roleText: {
     fontSize: 14,
     color: '#1C3165',
     fontWeight: '600',
   },
-  genderTextActive: {
+  roleTextActive: {
     color: '#fff',
     fontWeight: '600',
   },

@@ -33,6 +33,17 @@ function extractFirstHttpUrl(text) {
   return m[0].replace(/[),.]+$/g, '');
 }
 
+/** Accept common pasted meeting links without protocol (e.g. zoom.us/j/...). */
+function normalizeMeetingUrl(raw) {
+  const trimmed = String(raw || '').trim().replace(/[),.]+$/g, '');
+  if (!trimmed) return '';
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^(www\.)?[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(trimmed)) {
+    return `https://${trimmed.replace(/^\/+/, '')}`;
+  }
+  return '';
+}
+
 function paramStr(v) {
   if (v == null) return '';
   return String(Array.isArray(v) ? v[0] : v);
@@ -96,13 +107,11 @@ export default function TutorModuleKuppiLinkScreen() {
     if (!moduleId) return;
     const rawInput = String(url || '').trim();
     const extracted = extractFirstHttpUrl(rawInput);
-    const toSave =
-      extracted ||
-      (rawInput && /^https?:\/\//i.test(rawInput) ? rawInput.replace(/[),.]+$/g, '') : '');
+    const toSave = normalizeMeetingUrl(extracted || rawInput);
     if (!toSave) {
       Alert.alert(
         'No link found',
-        'Paste a message that includes a link starting with http:// or https://.',
+        'Paste a valid Zoom/Teams URL. Links like zoom.us/... are also supported.',
       );
       return;
     }

@@ -7,16 +7,6 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Dimensions,
-} from 'react-native';
-import { Stack, useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-const { width } = Dimensions.get('window');
-
-export default function OnboardingScreen() {
-  const router = useRouter();
-
-  async function handleGetStarted() {
     try {
       await AsyncStorage.setItem('hasSeenOnboarding', 'true');
     } catch (error) {

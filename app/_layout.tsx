@@ -10,7 +10,8 @@ import { AuthProvider, useAuth } from '@/context/auth';
 import { ActivityIndicator, View } from 'react-native';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  // Must match first real screen so tabs/home never open before auth flow.
+  anchor: 'index',
 };
 
 function RootLayoutNav() {

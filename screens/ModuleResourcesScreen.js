@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
@@ -459,4 +458,3 @@ const styles = StyleSheet.create({
     color: TEXT_MUTED,
   },
 });
-

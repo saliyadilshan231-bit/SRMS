@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -209,4 +208,3 @@ const styles = StyleSheet.create({
     lineHeight: 19,
   },
 });
-

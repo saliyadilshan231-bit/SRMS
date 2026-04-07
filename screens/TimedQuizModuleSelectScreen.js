@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useEffect } from 'react';
 import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -291,4 +290,3 @@ const styles = StyleSheet.create({
     color: DARK,
   },
 });
-

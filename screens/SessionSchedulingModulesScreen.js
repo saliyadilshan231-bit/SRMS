@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StatusBar, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -51,7 +50,6 @@ const MODULE_ICONS = [
   'globe-outline',
   'code-slash-outline',
 ];
-const MAX_MODULE_ROWS = 5;
 
 function paramStr(v) {
   if (v == null) return '';
@@ -82,19 +80,6 @@ export default function SessionSchedulingModulesScreen() {
   }, [facultyId, facultyTitleParam]);
 
   const moduleRows = useMemo(() => {
-    const uniqueRowsByModuleId = (rows) => {
-      const seen = new Set();
-      const unique = [];
-      for (const row of rows) {
-        const moduleKey = String(row?.module?.id ?? '');
-        if (!moduleKey || seen.has(moduleKey)) continue;
-        seen.add(moduleKey);
-        unique.push(row);
-        if (unique.length >= MAX_MODULE_ROWS) break;
-      }
-      return unique;
-    };
-
     const allFacultiesMode =
       (facultyId === SESSION_SCHEDULING_CREATE_ALL_ID && isCreateFlow) ||
       (facultyId === SESSION_SCHEDULING_BROWSE_ALL_ID && !isCreateFlow);
@@ -110,17 +95,16 @@ export default function SessionSchedulingModulesScreen() {
           }
         }
       }
-      return uniqueRowsByModuleId(rows);
+      return rows;
     }
     const ids = FACULTY_MODULE_IDS[facultyId];
     if (!ids?.length) return [];
     const allow = new Set(ids);
-    const rows = TIMED_QUIZ_MODULES.filter((mod) => allow.has(mod.id)).map((m) => ({
+    return TIMED_QUIZ_MODULES.filter((mod) => allow.has(mod.id)).map((m) => ({
       module: m,
       rowFacultyId: facultyId,
       rowFacultyTitle: facultyTitleDecoded || getFacultyById(facultyId)?.title || '',
     }));
-    return uniqueRowsByModuleId(rows);
   }, [facultyId, facultyTitleDecoded, isCreateFlow]);
 
   useEffect(() => {
@@ -532,4 +516,3 @@ const styles = StyleSheet.create({
     color: SUBTITLE,
   },
 });
-

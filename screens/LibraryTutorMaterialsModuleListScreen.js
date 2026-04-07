@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';

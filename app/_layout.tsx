@@ -1,93 +1,74 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, usePathname, useRouter, useSegments } from 'expo-router';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
+import {
+  Roboto_400Regular,
+  Roboto_500Medium,
+  Roboto_700Bold,
+  Roboto_900Black,
+} from '@expo-google-fonts/roboto';
+import { LibreBaskerville_700Bold } from '@expo-google-fonts/libre-baskerville';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { AuthProvider, useAuth } from '@/context/auth';
-import { ActivityIndicator, View } from 'react-native';
 
 export const unstable_settings = {
   // Must match first real screen so tabs/home never open before auth flow.
   anchor: 'index',
 };
 
-function RootLayoutNav() {
-  const { user, isLoading } = useAuth();
-  const segments = useSegments();
-  const pathname = usePathname();
-  const router = useRouter();
+export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Roboto_400Regular,
+    Roboto_500Medium,
+    Roboto_700Bold,
+    Roboto_900Black,
+    LibreBaskerville_700Bold,
+  });
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadOnboardingState() {
-      try {
-        const value = await AsyncStorage.getItem('hasSeenOnboarding');
-        if (mounted) setHasSeenOnboarding(value === 'true');
-      } catch {
-        if (mounted) setHasSeenOnboarding(false);
-      }
-    }
-
-    loadOnboardingState();
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isLoading || hasSeenOnboarding === null) return;
-    const inOnboarding = pathname === '/';
-    const inAuthGroup = segments[0] === 'login' || segments[0] === 'register';
-    const inTabsGroup = segments[0] === '(tabs)';
-
-    if (!hasSeenOnboarding) {
-      // Allow auth routes after tapping Get Started; otherwise redirect to onboarding.
-      if (!inOnboarding && !inAuthGroup) {
-        router.replace('/');
-      }
-      return;
-    }
-
-    if (!user && !inAuthGroup) {
-      router.replace('/login');
-    } else if (user && !inTabsGroup) {
-      router.replace('/(tabs)');
-    }
-  }, [user, isLoading, segments, router, hasSeenOnboarding, pathname]);
-
-  if (isLoading || hasSeenOnboarding === null) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0a7ea4" />
-      </View>
-    );
-  }
+  if (!fontsLoaded) return null;
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+        {/* Auth / app flow first — (tabs) last so the app never opens Home/Dashboard by mistake */}
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="kuppi-management" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="register" options={{ headerShown: false }} />
+        <Stack.Screen name="login-peer-tutor" options={{ headerShown: false }} />
+        <Stack.Screen name="peer-tutor-register" options={{ headerShown: false }} />
+        <Stack.Screen name="peer-tutor-signup" options={{ headerShown: false }} />
+        <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="student-zoom-link-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="student-zoom-links-list" options={{ headerShown: false }} />
+        <Stack.Screen name="library" options={{ headerShown: false }} />
+        <Stack.Screen name="library-upload" options={{ headerShown: false }} />
+        <Stack.Screen name="tutor-library-module-select" options={{ headerShown: false }} />
+        <Stack.Screen name="timed-quiz" options={{ headerShown: false }} />
+        <Stack.Screen name="timed-quiz-challenge" options={{ headerShown: false }} />
+        <Stack.Screen name="tutor-session-module-choice" options={{ headerShown: false }} />
+        <Stack.Screen name="tutor-module-kuppi-link" options={{ headerShown: false }} />
+        <Stack.Screen name="create-session-poll" options={{ headerShown: false }} />
+        <Stack.Screen name="edit-session-poll" options={{ headerShown: false }} />
+        <Stack.Screen name="session-scheduling-modules" options={{ headerShown: false }} />
+        <Stack.Screen name="session-scheduling-polls" options={{ headerShown: false }} />
+        <Stack.Screen name="module/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
-  );
-}
-
-export default function RootLayout() {
-  return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
   );
 }

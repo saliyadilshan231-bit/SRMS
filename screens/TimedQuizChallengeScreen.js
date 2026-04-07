@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -611,4 +610,3 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 });
-

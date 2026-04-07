@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useMemo, useState } from 'react';
 import {
   Pressable,
@@ -279,4 +278,3 @@ const styles = StyleSheet.create({
     fontFamily: 'Roboto_400Regular',
   },
 });
-

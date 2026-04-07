@@ -1,4 +1,3 @@
-// @ts-nocheck
 import React, { useCallback, useState } from 'react';
 import {
   Keyboard,
@@ -312,4 +311,3 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.6)',
   },
 });
-

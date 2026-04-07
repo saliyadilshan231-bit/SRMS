@@ -11,7 +11,7 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ActivityIndicator, View } from 'react-native';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  initialRouteName: '(tabs)',
 };
 
 function RootLayoutNav() {
@@ -57,7 +57,7 @@ function RootLayoutNav() {
 
     if (!user && !inAuthGroup) {
       router.replace('/login');
-    } else if (user && !inTabsGroup) {
+    } else if (user && !inTabsGroup && !pathname.startsWith('/(tabs)')) {
       router.replace('/(tabs)');
     }
   }, [user, isLoading, segments, router, hasSeenOnboarding, pathname]);

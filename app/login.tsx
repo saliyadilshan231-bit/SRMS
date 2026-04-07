@@ -1,19 +1,20 @@
 import { ThemedText } from '@/components/themed-text';
 import { useAuth } from '@/context/auth';
+import { isAdminEmail } from '@/lib/auth-utils';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function LoginScreen() {
@@ -32,9 +33,12 @@ export default function LoginScreen() {
     setIsLoading(true);
     try {
       await login(email.trim(), password);
-      // Navigation is now handled by the RootLayoutNav in _layout.tsx based on the user state.
-      // But we can also add a router.replace here to be safe and force it.
-      router.replace('/(tabs)');
+      // Route based on email pattern
+      if (isAdminEmail(email.trim())) {
+        router.replace('/admin-dashboard');
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (error: any) {
       Alert.alert('Login Failed', error?.message || 'Something went wrong');
     } finally {

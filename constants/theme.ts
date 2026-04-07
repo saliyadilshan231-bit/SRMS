@@ -1,8 +1,3 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 import { Platform } from 'react-native';
 
 const tintColorLight = '#0a7ea4';
@@ -29,13 +24,9 @@ export const Colors = {
 
 export const Fonts = Platform.select({
   ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
     sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
     serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
     rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
   },
   default: {
@@ -51,3 +42,21 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+export const COLORS = {
+  primary: '#2DD4BF',
+  primaryDark: '#0D9488',
+  primaryLight: '#CCFBF1',
+  sidebarBg: '#0A0A5C',
+  sidebarActive: '#2DD4BF',
+  sidebarText: '#A0AEC0',
+  sidebarActiveText: '#FFFFFF',
+  background: 'hsl(230, 22%, 56%)',
+  cardBg: '#FFFFFF',
+  textPrimary: '#1A202C',
+  textSecondary: '#718096',
+  alertRed: '#FC8181',
+  alertPurple: '#9F7AEA',
+  alertGreen: '#68D391',
+  white: '#FFFFFF',
+};

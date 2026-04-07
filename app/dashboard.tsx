@@ -1,11 +1,11 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useAuth } from '@/context/auth';
 import { useTaskManager } from '@/context/task-manager';
-import { Ionicons } from '@expo/vector-icons';
-import { Stack, useRouter } from 'expo-router';
-import React, { useState, useEffect, useMemo } from 'react';
 import { useTheme } from '@/context/theme';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { Ionicons } from '@expo/vector-icons';
+import { Stack, useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -27,6 +27,7 @@ interface ProjectCard {
   bgColor: string;
   isDark: boolean;
   accentColor: string;
+  route?: string;
 }
 
 export default function DashboardScreen() {
@@ -43,16 +44,16 @@ export default function DashboardScreen() {
 
   const dynamicProjects = useMemo(() => {
     const totalTasks = tasks.length;
-    const avgProgress = totalTasks > 0 
-      ? Math.round(tasks.reduce((acc, t) => acc + t.progress, 0) / totalTasks) 
+    const avgProgress = totalTasks > 0
+      ? Math.round(tasks.reduce((acc, t) => acc + t.progress, 0) / totalTasks)
       : 0;
-    
+
     // Get latest task date or default
-    const latestTask = tasks.length > 0 
-      ? [...tasks].sort((a,b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]
+    const latestTask = tasks.length > 0
+      ? [...tasks].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0]
       : null;
-    
-    const taskDate = latestTask 
+
+    const taskDate = latestTask
       ? new Date(latestTask.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
       : 'No tasks yet';
 
@@ -67,6 +68,7 @@ export default function DashboardScreen() {
         bgColor: '#3A025B',
         isDark: true,
         accentColor: '#FFFFFF',
+        route: '/(tabs)/task-insights' as const,
       },
       {
         id: '2',
@@ -78,6 +80,7 @@ export default function DashboardScreen() {
         bgColor: '#FFFFFF',
         isDark: false,
         accentColor: '#3A025B',
+        route: '/(tabs)/focus' as const,
       },
       {
         id: '3',
@@ -89,6 +92,7 @@ export default function DashboardScreen() {
         bgColor: '#FFFFFF',
         isDark: false,
         accentColor: '#48BB78',
+        route: '/(tabs)/wellbeing' as const,
       },
       {
         id: '4',
@@ -100,17 +104,18 @@ export default function DashboardScreen() {
         bgColor: '#FFFFFF',
         isDark: false,
         accentColor: '#ECC94B',
+        route: '/(tabs)/grade-analyst' as const,
       },
     ];
   }, [tasks]);
 
   const stats = useMemo(() => {
     const totalTasks = tasks.length;
-    const avgProgress = totalTasks > 0 
-      ? Math.round(tasks.reduce((acc, t) => acc + t.progress, 0) / totalTasks) 
+    const avgProgress = totalTasks > 0
+      ? Math.round(tasks.reduce((acc, t) => acc + t.progress, 0) / totalTasks)
       : 0;
     const sessionCount = sessions.length;
-    
+
     return {
       avgProgress: `${avgProgress}%`,
       sessionCount: String(sessionCount),
@@ -164,7 +169,7 @@ export default function DashboardScreen() {
 
     // Adjust for Monday start (0=Mon, 6=Sun)
     const startOffset = (firstDay === 0 ? 6 : firstDay - 1);
-    
+
     const days = [];
     // Previous month filler
     for (let i = startOffset - 1; i >= 0; i--) {
@@ -175,7 +180,7 @@ export default function DashboardScreen() {
       days.push({ day: i, isCurrent: true, isToday: i === today });
     }
     // Next month filler
-    const totalSlots = 42; 
+    const totalSlots = 42;
     const remaining = totalSlots - days.length;
     for (let i = 1; i <= remaining; i++) {
       days.push({ day: i, isCurrent: false });
@@ -199,7 +204,7 @@ export default function DashboardScreen() {
             </View>
 
             {/* Notification Bell */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.bellButton, { backgroundColor: colors.iconBg, borderColor: colors.border }]}
               onPress={() => router.push('/(tabs)/notifications')}
             >
@@ -259,7 +264,7 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 key={project.id}
                 style={[styles.featureCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => project.id === '1' && router.push('/(tabs)/task-insights')}
+                onPress={() => project.route && router.push(project.route)}
               >
                 <View style={[styles.featureIconBg, { backgroundColor: isDark ? colors.iconBg : iconBgColor }]}>
                   <IconSymbol name={project.icon} size={24} color={isDark ? colors.white : iconColor} />
@@ -291,7 +296,7 @@ export default function DashboardScreen() {
               <View style={styles.calendarDot} />
             </View>
             <View style={styles.calendarDaysRow}>
-              {['M','T','W','T','F','S','S'].map((d, i)=> (
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
                 <Text key={i} style={[styles.calendarDayText, { color: colors.subtext }]}>{d}</Text>
               ))}
             </View>
@@ -299,13 +304,13 @@ export default function DashboardScreen() {
               {calendarDays.map((item: any, idx: number) => (
                 <View key={idx} style={styles.calendarSlot}>
                   {item.isToday ? (
-                     <View style={[styles.calendarDateActiveBg, { backgroundColor: isDark ? colors.white : colors.navy }]}>
-                        <Text style={[styles.calendarDateActiveText, { color: isDark ? colors.navy : colors.white }]}>{item.day}</Text>
-                     </View>
+                    <View style={[styles.calendarDateActiveBg, { backgroundColor: isDark ? colors.white : colors.navy }]}>
+                      <Text style={[styles.calendarDateActiveText, { color: isDark ? colors.navy : colors.white }]}>{item.day}</Text>
+                    </View>
                   ) : (
-                     <Text style={[styles.calendarDateText, { color: colors.text }, !item.isCurrent && { color: isDark ? colors.primary : '#CBD5E0' }]}>
-                        {item.day}
-                     </Text>
+                    <Text style={[styles.calendarDateText, { color: colors.text }, !item.isCurrent && { color: isDark ? colors.primary : '#CBD5E0' }]}>
+                      {item.day}
+                    </Text>
                   )}
                 </View>
               ))}

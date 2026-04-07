@@ -7,13 +7,17 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Dimensions,
-    try {
-      await AsyncStorage.setItem('hasSeenOnboarding', 'true');
-    } catch (error) {
-      console.warn('AsyncStorage write failed in onboarding:', error);
-    }
-    router.replace('/login');
-  }
+} from 'react-native';
+import { Stack, useRouter } from 'expo-router';
+
+const { width } = Dimensions.get('window');
+
+export default function Index() {
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    router.push('/login');
+  };
 
   return (
     <SafeAreaView style={styles.container}>

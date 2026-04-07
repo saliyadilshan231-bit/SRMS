@@ -1,25 +1,41 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, usePathname, useRouter, useSegments } from 'expo-router';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
+import {
+  Roboto_400Regular,
+  Roboto_500Medium,
+  Roboto_700Bold,
+  Roboto_900Black,
+} from '@expo-google-fonts/roboto';
+import { LibreBaskerville_700Bold } from '@expo-google-fonts/libre-baskerville';
 
 import { AuthProvider, useAuth } from '@/context/auth';
 import { TaskManagerProvider, useTaskManager } from '@/context/task-manager';
 import { SRMSThemeProvider, useTheme } from '@/context/theme';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { usePathname, useRouter, useSegments } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
+  anchor: 'index',
 };
 
 function FloatingMiniTimer() {
     const { focusSession, setMinimized, tasks } = useTaskManager();
     const router = useRouter();
-    const colors = useThemeColors();
     const { uiMode, isMinimized, secondsLeft, focusMin, phase, selectedTaskId } = focusSession;
 
     if (uiMode !== 'focus' || !isMinimized) return null;
@@ -95,6 +111,18 @@ function RootLayoutNav() {
   const { isDark } = useTheme();
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
 
+  const [fontsLoaded] = useFonts({
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    Roboto_400Regular,
+    Roboto_500Medium,
+    Roboto_700Bold,
+    Roboto_900Black,
+    LibreBaskerville_700Bold,
+  });
+
   useEffect(() => {
     let mounted = true;
 
@@ -115,14 +143,14 @@ function RootLayoutNav() {
   }, []);
 
   useEffect(() => {
-    if (isLoading || hasSeenOnboarding === null) return;
+    if (isLoading || hasSeenOnboarding === null || !fontsLoaded) return;
     const inOnboarding = pathname === '/';
     const inAuthGroup =
-      segments[0] === 'login' || segments[0] === 'register' || segments[0] === 'verify-email' || segments[0] === 'admin-register';
+      segments[0] === 'login' || segments[0] === 'register' || segments[0] === 'verify-email' || segments[0] === 'admin-register' ||
+      segments[0] === 'login-peer-tutor' || segments[0] === 'peer-tutor-register' || segments[0] === 'peer-tutor-signup';
     const inTabsGroup = segments[0] === '(tabs)';
 
     if (!hasSeenOnboarding) {
-      // Allow auth routes after tapping Get Started; otherwise redirect to onboarding.
       if (!inOnboarding && !inAuthGroup) {
         router.replace('/');
       }
@@ -134,9 +162,9 @@ function RootLayoutNav() {
     } else if (user && !inTabsGroup && !pathname.startsWith('/(tabs)')) {
       router.replace('/(tabs)');
     }
-  }, [user, isLoading, segments, router, hasSeenOnboarding, pathname]);
+  }, [user, isLoading, segments, router, hasSeenOnboarding, pathname, fontsLoaded]);
 
-  if (isLoading || hasSeenOnboarding === null) {
+  if (isLoading || hasSeenOnboarding === null || !fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#0a7ea4" />
@@ -147,12 +175,32 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <Stack>
+        {/* Auth / app flow first — (tabs) last so the app never opens Home/Dashboard by mistake */}
         <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="kuppi-management" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="register" options={{ headerShown: false }} />
         <Stack.Screen name="admin-register" options={{ headerShown: false }} />
         <Stack.Screen name="verify-email" options={{ headerShown: false }} />
+        <Stack.Screen name="login-peer-tutor" options={{ headerShown: false }} />
+        <Stack.Screen name="peer-tutor-register" options={{ headerShown: false }} />
+        <Stack.Screen name="peer-tutor-signup" options={{ headerShown: false }} />
+        <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="student-zoom-link-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="student-zoom-links-list" options={{ headerShown: false }} />
+        <Stack.Screen name="library" options={{ headerShown: false }} />
+        <Stack.Screen name="library-upload" options={{ headerShown: false }} />
+        <Stack.Screen name="tutor-library-module-select" options={{ headerShown: false }} />
+        <Stack.Screen name="timed-quiz" options={{ headerShown: false }} />
+        <Stack.Screen name="timed-quiz-challenge" options={{ headerShown: false }} />
+        <Stack.Screen name="tutor-session-module-choice" options={{ headerShown: false }} />
+        <Stack.Screen name="tutor-module-kuppi-link" options={{ headerShown: false }} />
+        <Stack.Screen name="create-session-poll" options={{ headerShown: false }} />
+        <Stack.Screen name="edit-session-poll" options={{ headerShown: false }} />
+        <Stack.Screen name="session-scheduling-modules" options={{ headerShown: false }} />
+        <Stack.Screen name="session-scheduling-polls" options={{ headerShown: false }} />
+        <Stack.Screen name="module/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <FloatingMiniTimer />
@@ -160,7 +208,6 @@ function RootLayoutNav() {
     </ThemeProvider>
   );
 }
-
 export default function RootLayout() {
   return (
     <SRMSThemeProvider>

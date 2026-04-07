@@ -106,6 +106,12 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={24} name="info.circle.fill" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="register"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

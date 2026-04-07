@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   formCard: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 50, // රූපයේ පරිදි ලොකු වටකුරු දාර
+    borderTopLeftRadius: 50,
     borderTopRightRadius: 50,
     paddingHorizontal: 30,
     paddingTop: 45,
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   textInput: {
-    backgroundColor: '#F1F5F9', // ලා නිල්/අළු පාට පසුබිම
+    backgroundColor: '#F1F5F9',
     borderRadius: 16,
     padding: 18,
     fontSize: 16,
@@ -215,7 +215,6 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: 'center',
     marginTop: 40,
-    // Shadow (iOS/Android)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -242,3 +241,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+

@@ -3,7 +3,7 @@ import { useAuth } from '@/context/auth';
 import { useTaskManager } from '@/context/task-manager';
 import { useTheme } from '@/context/theme';
 import { useThemeColors } from '@/hooks/useThemeColors';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo-vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {

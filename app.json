@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "srms",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
     },
@@ -28,6 +28,13 @@
     "plugins": [
       "expo-router",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow SRMS to access your photos to set your profile picture.",
+          "cameraPermission": "Allow SRMS to use the camera for your profile picture."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",
@@ -42,7 +49,15 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
+    },
+    "extra": {
+      "appwriteEndpoint": "https://sgp.cloud.appwrite.io/v1",
+      "appwriteProjectId": "69aa65950030a8c889da",
+      "appwriteDatabaseId": "69aa65950030a8c889da",
+      "appwriteTutorCollectionId": "",
+      "appwriteProofBucketId": "",
+      "appwriteSessionPollsCollectionId": "sessionpolls"
     }
   }
 }

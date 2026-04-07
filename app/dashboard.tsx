@@ -3,7 +3,8 @@ import { useAuth } from '@/context/auth';
 import { useTaskManager } from '@/context/task-manager';
 import { useTheme } from '@/context/theme';
 import { useThemeColors } from '@/hooks/useThemeColors';
-import { Ionicons } from '@expo-vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
@@ -16,6 +17,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { STORAGE_KEYS } from '@/constants/storageKeys';
 
 interface ProjectCard {
   id: string;
@@ -80,7 +82,7 @@ export default function DashboardScreen() {
         bgColor: '#FFFFFF',
         isDark: false,
         accentColor: '#3A025B',
-        route: '/(tabs)/focus' as const,
+        route: '/kuppi-management' as const,
       },
       {
         id: '3',
@@ -264,7 +266,22 @@ export default function DashboardScreen() {
               <TouchableOpacity
                 key={project.id}
                 style={[styles.featureCard, { backgroundColor: colors.card, borderColor: colors.border }]}
-                onPress={() => project.route && router.push(project.route)}
+                onPress={async () => {
+                  if (project.route === '/kuppi-management') {
+                    // Reset Kuppi session state if user clicks that project
+                    try {
+                      await AsyncStorage.multiRemove([
+                        STORAGE_KEYS.studentEmail,
+                        STORAGE_KEYS.loginRole,
+                        STORAGE_KEYS.stayLoggedIn,
+                        STORAGE_KEYS.lastLoginAt
+                      ]);
+                    } catch (e) {
+                      console.error('Failed to reset Kuppi session:', e);
+                    }
+                  }
+                  if (project.route) router.push(project.route);
+                }}
               >
                 <View style={[styles.featureIconBg, { backgroundColor: isDark ? colors.iconBg : iconBgColor }]}>
                   <IconSymbol name={project.icon} size={24} color={isDark ? colors.white : iconColor} />

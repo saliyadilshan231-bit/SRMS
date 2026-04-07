@@ -426,6 +426,14 @@ export default function DashboardScreen() {
         colors: UNIFIED_CARD_COLORS,
         featured: false,
       });
+      list.push({
+        title: 'Zoom Link',
+        description: 'Set your Zoom/Teams meeting URL for Kuppi sessions',
+        icon: 'videocam-outline',
+        iconType: 'ionicons',
+        colors: UNIFIED_CARD_COLORS,
+        featured: false,
+      });
     } else {
       list.push({
         title: 'Session scheduling',
@@ -437,7 +445,7 @@ export default function DashboardScreen() {
       });
     }
     list.push({
-      title: 'Library (Notes)',
+      title: 'Library',
       description: 'Access and upload learning materials',
       icon: 'book-outline',
       iconType: 'ionicons',
@@ -476,12 +484,16 @@ export default function DashboardScreen() {
       router.push('/tutor-library-module-select');
       return;
     }
-    if (title === 'Library (Notes)') {
+    if (title === 'Library' || title === 'Library (Notes)') {
       router.push('/library');
       return;
     }
-    if (title === 'Timed Quizzes') {
+    if (title === 'Timed Quizzes' || title === 'Timed Quizzess') {
       router.push('/timed-quiz');
+      return;
+    }
+    if (title === 'Zoom Link' && loginRole === 'peerTutor') {
+      router.push('/tutor-module-kuppi-link');
       return;
     }
     Alert.alert(title, 'Feature page can be connected in the next step.');

@@ -190,7 +190,7 @@ export default function LoginScreen({ variant = 'student' }) {
       }
       await appendRecentLoginEmail(emailNorm);
       setSavedEmails((prev) => [emailNorm, ...prev.filter((e) => e !== emailNorm)].slice(0, MAX_SAVED_EMAILS));
-      router.replace('/dashboard');
+      router.replace('/kuppi-dashboard');
     } finally {
       setLoading(false);
     }

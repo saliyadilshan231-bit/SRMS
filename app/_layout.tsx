@@ -145,9 +145,20 @@ function RootLayoutNav() {
   useEffect(() => {
     if (isLoading || hasSeenOnboarding === null || !fontsLoaded) return;
     const inOnboarding = pathname === '/';
+    const kuppiRoutes = [
+      'login-peer-tutor', 'peer-tutor-register', 'peer-tutor-signup',
+      'kuppi-management', 'login-student', 'kuppi-dashboard',
+      'library', 'library-upload', 'tutor-library-module-select',
+      'timed-quiz', 'timed-quiz-challenge', 'tutor-session-module-choice',
+      'tutor-module-kuppi-link', 'create-session-poll', 'edit-session-poll',
+      'session-scheduling-modules', 'session-scheduling-polls',
+      'student-zoom-link-detail', 'student-zoom-links-list'
+    ];
+    const isKuppiPath = kuppiRoutes.includes(segments[0]);
+
     const inAuthGroup =
       segments[0] === 'login' || segments[0] === 'register' || segments[0] === 'verify-email' || segments[0] === 'admin-register' ||
-      segments[0] === 'login-peer-tutor' || segments[0] === 'peer-tutor-register' || segments[0] === 'peer-tutor-signup';
+      isKuppiPath || inOnboarding;
     const inTabsGroup = segments[0] === '(tabs)';
 
     if (!hasSeenOnboarding) {
@@ -157,9 +168,11 @@ function RootLayoutNav() {
       return;
     }
 
+    const inKuppiGroup = isKuppiPath || inOnboarding;
+
     if (!user && !inAuthGroup) {
       router.replace('/login');
-    } else if (user && !inTabsGroup && !pathname.startsWith('/(tabs)')) {
+    } else if (user && !inTabsGroup && !pathname.startsWith('/(tabs)') && !inKuppiGroup) {
       router.replace('/(tabs)');
     }
   }, [user, isLoading, segments, router, hasSeenOnboarding, pathname, fontsLoaded]);
@@ -178,11 +191,13 @@ function RootLayoutNav() {
         {/* Auth / app flow first — (tabs) last so the app never opens Home/Dashboard by mistake */}
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="kuppi-management" options={{ headerShown: false }} />
+        <Stack.Screen name="kuppi-dashboard" options={{ headerShown: false }} />
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="register" options={{ headerShown: false }} />
         <Stack.Screen name="admin-register" options={{ headerShown: false }} />
         <Stack.Screen name="verify-email" options={{ headerShown: false }} />
         <Stack.Screen name="login-peer-tutor" options={{ headerShown: false }} />
+        <Stack.Screen name="login-student" options={{ headerShown: false }} />
         <Stack.Screen name="peer-tutor-register" options={{ headerShown: false }} />
         <Stack.Screen name="peer-tutor-signup" options={{ headerShown: false }} />
         <Stack.Screen name="dashboard" options={{ headerShown: false }} />

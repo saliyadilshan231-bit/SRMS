@@ -16,6 +16,63 @@ export const MOOD_LOGS_COLLECTION_ID = 'mood_logs';
 export const COUNSELORS_COLLECTION_ID = 'counselors';
 export const BOOKINGS_COLLECTION_ID = 'bookings';
 export const SCREENER_RESULTS_COLLECTION_ID = 'screener_results';
+export const TASKS_COLLECTION_ID = 'tasks';
+export const SESSIONS_COLLECTION_ID = 'sessions';
+export const NOTIFICATIONS_COLLECTION_ID = 'notifications';
+
+// ── Database Operations ──────────────────────────────────
+
+/** Task Management Helpers */
+export const getTasksByUser = async (userId: string) => {
+  return await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
+    Query.equal('userId', userId),
+    Query.orderDesc('$createdAt'),
+  ]);
+};
+
+export const createTaskInDB = async (data: any) => {
+  return await databases.createDocument(DATABASE_ID, TASKS_COLLECTION_ID, ID.unique(), data);
+};
+
+export const updateTaskInDB = async (taskId: string, data: any) => {
+  return await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, data);
+};
+
+export const deleteTaskInDB = async (taskId: string) => {
+  return await databases.deleteDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId);
+};
+
+/** Study Session Helpers */
+export const getStudySessionsByUser = async (userId: string) => {
+  return await databases.listDocuments(DATABASE_ID, SESSIONS_COLLECTION_ID, [
+    Query.equal('userId', userId),
+    Query.orderDesc('$createdAt'),
+  ]);
+};
+
+export const createStudySessionInDB = async (data: any) => {
+  return await databases.createDocument(DATABASE_ID, SESSIONS_COLLECTION_ID, ID.unique(), data);
+};
+
+/** Notification Helpers */
+export const getNotificationsByUser = async (userId: string) => {
+  return await databases.listDocuments(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, [
+    Query.equal('userId', userId),
+    Query.orderDesc('$createdAt'),
+  ]);
+};
+
+export const createNotificationInDB = async (data: any) => {
+  return await databases.createDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, ID.unique(), data);
+};
+
+export const updateNotificationInDB = async (notifId: string, data: any) => {
+  return await databases.updateDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, notifId, data);
+};
+
+export const deleteNotificationFromDB = async (notifId: string) => {
+  return await databases.deleteDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, notifId);
+};
 
 // ── Types ──────────────────────────────────────────────────
 export interface CounselorDoc {

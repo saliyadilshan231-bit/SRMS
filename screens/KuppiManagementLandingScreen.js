@@ -46,7 +46,7 @@ export default function KuppiManagementLandingScreen() {
             <TouchableOpacity
               style={styles.studentButton}
               activeOpacity={0.9}
-              onPress={() => router.push('/login')}>
+              onPress={() => router.push('/login-student')}>
               <LinearGradient
                 colors={['#0A0A5C', '#152281']}
                 start={{ x: 0, y: 0 }}

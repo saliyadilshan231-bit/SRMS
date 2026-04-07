@@ -1,6 +1,15 @@
-import { DATABASE_ID, databases, NOTIFICATIONS_COLLECTION_ID, SESSIONS_COLLECTION_ID, TASKS_COLLECTION_ID } from '@/lib/appwrite';
+import {
+  createNotificationInDB,
+  createStudySessionInDB,
+  createTaskInDB,
+  deleteNotificationFromDB,
+  getNotificationsByUser,
+  getStudySessionsByUser,
+  getTasksByUser,
+  updateNotificationInDB,
+  updateTaskInDB
+} from '@/lib/appwrite';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ID, Query } from 'appwrite';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useAuth } from './auth';
 
@@ -223,10 +232,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
       setIsSyncing(true);
       try {
         // Fetch tasks
-        const taskDocs = await databases.listDocuments(DATABASE_ID, TASKS_COLLECTION_ID, [
-          Query.equal('userId', user!.$id),
-          Query.orderDesc('$createdAt')
-        ]);
+        const taskDocs = await getTasksByUser(user!.$id);
 
         const mappedTasks: TaskItem[] = taskDocs.documents.map((doc: any) => ({
           id: doc.$id,
@@ -250,10 +256,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
         setTasks(mappedTasks);
 
         // Fetch sessions
-        const sessionDocs = await databases.listDocuments(DATABASE_ID, SESSIONS_COLLECTION_ID, [
-          Query.equal('userId', user!.$id),
-          Query.orderDesc('$createdAt')
-        ]);
+        const sessionDocs = await getStudySessionsByUser(user!.$id);
 
         const mappedLogs: SessionLog[] = sessionDocs.documents.map((doc: any) => ({
           taskTitle: doc.taskTitle,
@@ -266,10 +269,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
         setFocusSession(prev => ({ ...prev, completedSessions: mappedLogs }));
 
         // Fetch Notifications
-        const notifDocs = await databases.listDocuments(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, [
-          Query.equal('userId', user!.$id),
-          Query.orderDesc('$createdAt')
-        ]);
+        const notifDocs = await getNotificationsByUser(user!.$id);
 
         const mappedNotifs: NotificationItem[] = notifDocs.documents.map((doc: any) => ({
           id: doc.$id,
@@ -318,7 +318,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
             // Sync to Appwrite
             if (user) {
               const selectedTaskObj = tasks.find(t => t.id === prev.selectedTaskId);
-              databases.createDocument(DATABASE_ID, SESSIONS_COLLECTION_ID, ID.unique(), {
+              createStudySessionInDB({
                 userId: user.$id,
                 taskId: prev.selectedTaskId || 'none',
                 taskTitle: selectedTaskObj?.title ?? 'Focus Session',
@@ -455,7 +455,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
       // Post New Notifications
       for (const item of newItems) {
         try {
-          const doc = await databases.createDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, ID.unique(), {
+          const doc = await createNotificationInDB({
             userId: user.$id,
             ...item,
             stableId: `${item.type}-${item.relatedTaskId}` // for future duplicates
@@ -472,7 +472,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
 
   async function markNotifAsRead(id: string) {
     try {
-      await databases.updateDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, id, { unread: false });
+      await updateNotificationInDB(id, { unread: false });
       setDbNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
     } catch (e) {
       console.error('Failed to mark notification as read:', e);
@@ -488,7 +488,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
 
   async function deleteNotification(id: string) {
     try {
-      await databases.deleteDocument(DATABASE_ID, NOTIFICATIONS_COLLECTION_ID, id);
+      await deleteNotificationFromDB(id);
       // Track stable ID to prevent re-creation
       const notif = dbNotifications.find(n => n.id === id);
       if (notif && notif.relatedTaskId) {
@@ -534,7 +534,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
     };
 
     try {
-      const doc = await databases.createDocument(DATABASE_ID, TASKS_COLLECTION_ID, ID.unique(), docData);
+      const doc = await createTaskInDB(docData);
       const newTask: TaskItem = {
         id: doc.$id,
         ...input,
@@ -571,7 +571,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
     ];
 
     try {
-      await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
+      await updateTaskInDB(taskId, {
         progress: bounded,
         status,
         updatedAt: now,
@@ -613,7 +613,7 @@ export function TaskManagerProvider({ children }: { children: ReactNode }) {
     const newStatus = isLate ? 'Late Submission' : 'Submitted';
 
     try {
-      await databases.updateDocument(DATABASE_ID, TASKS_COLLECTION_ID, taskId, {
+      await updateTaskInDB(taskId, {
         updatedAt: now,
         submissions: JSON.stringify(newSubmissions),
         submissionStatus: newStatus

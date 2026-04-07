@@ -9,6 +9,10 @@ const EMAIL_VERIFICATION_URLS = [
   'srms://verify-email',
   'https://verify-email',
 ].filter((value): value is string => Boolean(value && value.trim()));
+const STUDENTS_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_STUDENTS_COLLECTION_ID || 'students';
+const GRADES_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_GRADES_COLLECTION_ID || 'grades';
+
+export { DATABASE_ID, GRADES_COLLECTION_ID, STUDENTS_COLLECTION_ID };
 
 type StudentData = {
   name: string;

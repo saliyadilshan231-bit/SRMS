@@ -13,7 +13,7 @@ import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  initialRouteName: '(tabs)',
 };
 
 function FloatingMiniTimer() {
@@ -131,7 +131,7 @@ function RootLayoutNav() {
 
     if (!user && !inAuthGroup) {
       router.replace('/login');
-    } else if (user && !inTabsGroup) {
+    } else if (user && !inTabsGroup && !pathname.startsWith('/(tabs)')) {
       router.replace('/(tabs)');
     }
   }, [user, isLoading, segments, router, hasSeenOnboarding, pathname]);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Colors as COLORS } from '../../constants/theme';
-import { ModuleItem } from '../../types';
+import { ModuleItem } from '../../expo/types/router';
 
 const MODULES: ModuleItem[] = [
   { id: '1', icon: '✅', title: 'Task Manager', subtitle: '3 overdue tasks' },

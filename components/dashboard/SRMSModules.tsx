@@ -1,13 +1,13 @@
 import React from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Colors as COLORS } from '../../constants/theme';
-import { ModuleItem } from '../../expo/types/router';
+import { ModuleItem } from '../../types';
 
 const MODULES: ModuleItem[] = [
   { id: '1', icon: '✅', title: 'Task Manager', subtitle: '3 overdue tasks' },
-  { id: '2', icon: '🗓️', title: 'Attendance',   subtitle: '92% this month' },
-  { id: '3', icon: '📈', title: 'Grades',        subtitle: 'GPA 3.2 — stable' },
-  { id: '4', icon: '📋', title: 'Schedule',      subtitle: 'Heavy week ahead' },
+  { id: '2', icon: '🗓️', title: 'Attendance', subtitle: '92% this month' },
+  { id: '3', icon: '📈', title: 'Grades', subtitle: 'GPA 3.2 — stable' },
+  { id: '4', icon: '📋', title: 'Schedule', subtitle: 'Heavy week ahead' },
 ];
 
 export default function SRMSModules() {

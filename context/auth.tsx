@@ -1,4 +1,5 @@
 import { account, databases } from '@/lib/appwrite';
+
 import { ID, type Models } from 'appwrite';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
@@ -70,14 +71,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setUser(currentUser);
-      
+
       // Fetch user role from DB
       try {
         const profile = await databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, currentUser.$id);
         setRole(profile.role || 'Student');
       } catch (profileError) {
-         // Default fallback or handle error
-         setRole('Student'); 
+        // Default fallback or handle error
+        setRole('Student');
       }
     } catch {
       setUser(null);
@@ -107,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profile = await databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, existingUser.$id);
         setRole(profile.role || 'Student');
       } catch (profileError) {
-         setRole('Student');
+        setRole('Student');
       }
       return;
     }
@@ -127,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const profile = await databases.getDocument(DATABASE_ID, USERS_COLLECTION_ID, currentUser.$id);
         setRole(profile.role || 'Student');
       } catch (profileError) {
-         setRole('Student');
+        setRole('Student');
       }
     } catch (error) {
       throw new Error(getErrorMessage(error, 'Unable to log in. Please check your credentials.'));
@@ -168,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function adminRegister(data: AdminData & { password: string }) {
     const { name, email, password, gender, role } = data;
-    const username = email.split('@')[0] + Math.floor(Math.random() * 1000); 
+    const username = email.split('@')[0] + Math.floor(Math.random() * 1000);
 
     try {
       await account.create(ID.unique(), email, password, name);

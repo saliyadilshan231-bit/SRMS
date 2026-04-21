@@ -1,4 +1,5 @@
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { STORAGE_KEYS } from '@/constants/storageKeys';
 import { useAuth } from '@/context/auth';
 import { useTaskManager } from '@/context/task-manager';
 import { useTheme } from '@/context/theme';
@@ -17,7 +18,6 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { STORAGE_KEYS } from '@/constants/storageKeys';
 
 interface ProjectCard {
   id: string;
@@ -236,16 +236,16 @@ export default function DashboardScreen() {
           {/* Stats Row */}
           <View style={styles.statsContainer}>
             <View style={[styles.statCard, { backgroundColor: colors.iconBg, borderColor: colors.border }]}>
-              <Text style={styles.statNumber}>{stats.sessionCount}</Text>
-              <Text style={[styles.statLabel, { color: isDark ? colors.accent : '#8A9DBA' }]}>Sessions</Text>
+              <Text style={[styles.statNumber, { color: isDark ? colors.accent : '#1061da' }]}>{stats.sessionCount}</Text>
+              <Text style={[styles.statLabel, { color: isDark ? colors.accent : '#1061da' }]}>Sessions</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: colors.iconBg, borderColor: colors.border }]}>
-              <Text style={styles.statNumber}>{stats.avgProgress}</Text>
-              <Text style={[styles.statLabel, { color: isDark ? colors.accent : '#8A9DBA' }]}>Progress</Text>
+              <Text style={[styles.statNumber, { color: isDark ? colors.accent : '#1061da' }]}>{stats.avgProgress}</Text>
+              <Text style={[styles.statLabel, { color: isDark ? colors.accent : '#1061da' }]}>Progress</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: colors.iconBg, borderColor: colors.border }]}>
-              <Text style={styles.statNumber}>{stats.resourceCount}</Text>
-              <Text style={[styles.statLabel, { color: isDark ? colors.accent : '#8A9DBA' }]}>Resources</Text>
+              <Text style={[styles.statNumber, { color: isDark ? colors.accent : '#1061da' }]}>{stats.resourceCount}</Text>
+              <Text style={[styles.statLabel, { color: isDark ? colors.accent : '#1061da' }]}>Resources</Text>
             </View>
           </View>
         </SafeAreaView>
@@ -456,7 +456,6 @@ const styles = StyleSheet.create({
     borderColor: '#293C6E',
   },
   statNumber: {
-    color: '#FFFFFF',
     fontSize: 20,
     fontWeight: '800',
   },

@@ -34,65 +34,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="tasks"
-        options={{
-          href: null,
-          title: 'Tasks',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="checkmark.circle.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="progress"
-        options={{
-          href: null,
-          title: 'Progress',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="chart.bar.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="focus"
-        options={{
-          href: null,
-          title: 'Focus',
-          tabBarIcon: ({ color }) => <IconSymbol size={24} name="timer" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          href: null,
-          title: 'Notifications',
-        }}
-      />
-      <Tabs.Screen
-        name="notificationHub"
-        options={{
-          href: null,
-          title: 'Notification Hub',
-        }}
-      />
-      <Tabs.Screen
-        name="task-insights"
-        options={{
-          href: null,
-          title: 'Task Insights',
-        }}
-      />
-      <Tabs.Screen
-        name="grade-analyst"
-        options={{
-          href: null,
-          title: 'Grade Analyst',
-        }}
-      />
-      <Tabs.Screen
-        name="task-details"
-        options={{
-          href: null,
-          title: 'Task Details',
-        }}
-      />
-      <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
@@ -107,7 +48,67 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="tasks"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="progress"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="focus"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="notificationHub"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="task-insights"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="grade-analyst"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="task-details"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="register"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="admin-dashboard"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="wellbeing"
         options={{
           href: null,
         }}

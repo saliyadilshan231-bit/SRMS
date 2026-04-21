@@ -72,6 +72,10 @@ export default function GradeAnalystScreen() {
   const [loadingAI, setLoadingAI] = useState(false);
   const [showAiModal, setShowAiModal] = useState(false);
 
+  // ML Feedback State
+  const [semesterFeedback, setSemesterFeedback] = useState('');
+  const [overallFeedback, setOverallFeedback] = useState('');
+
   const { user } = useAuth();
   const [rows, setRows] = useState<CourseRow[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -190,6 +194,12 @@ Provide exactly 5 concise, actionable career guidance points.
 Highlight strengths, suggest improvements, recommend relevant projects, certifications, internships, and link to real tech career paths.
 Use clear bullet points only. Professional and encouraging tone.`;
 
+    if (!HF_API_KEY || HF_API_KEY === 'YOUR_HUGGING_FACE_TOKEN_HERE') {
+      setAiAdvice('Hugging Face API Key is not configured.\n\nPlease create a .env file in the project root and add:\nEXPO_PUBLIC_HF_API_KEY=your_token_here');
+      setLoadingAI(false);
+      return;
+    }
+
     try {
       const response = await fetch('https://router.huggingface.co/v1/chat/completions', {
         method: 'POST',
@@ -205,13 +215,21 @@ Use clear bullet points only. Professional and encouraging tone.`;
         }),
       });
 
+      if (response.status === 401) {
+        throw new Error('Unauthorized: Invalid or expired Hugging Face API key.');
+      }
+
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       const text = data?.choices?.[0]?.message?.content?.trim() || 'No response from AI.';
       setAiAdvice(text);
-    } catch (err) {
+    } catch (err: any) {
       console.error('AI Error:', err);
-      setAiAdvice('Failed to get career guidance. Please check your internet and try again.');
+      if (err.message.includes('Unauthorized')) {
+        setAiAdvice('Invalid API Key. Please update your .env file with a valid Hugging Face Token.');
+      } else {
+        setAiAdvice('Failed to get career guidance. Please check your internet and try again.');
+      }
     } finally {
       setLoadingAI(false);
     }
@@ -223,6 +241,56 @@ Use clear bullet points only. Professional and encouraging tone.`;
       const semMatch = currentSemester === 'All' || row.semester === currentSemester;
       return yearMatch && semMatch;
     });
+  }, [rows, currentYear, currentSemester]);
+
+  // ML Feedback Fetch
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      const yearRows = rows.filter(r => r.year === currentYear);
+      const semRows = currentSemester === 'All' ? yearRows : yearRows.filter(r => r.semester === currentSemester);
+      
+      const calcGroupGpa = (groupRows: CourseRow[]) => {
+        const qp = groupRows.reduce((s, r) => s + parseNum(r.credits) * (gradePoints[r.grade] ?? 0), 0);
+        const tc = groupRows.reduce((s, r) => s + parseNum(r.credits), 0);
+        return tc > 0 ? qp / tc : 0;
+      };
+
+      const semGpa = calcGroupGpa(semRows);
+      const yearGpa = calcGroupGpa(yearRows);
+
+      if (semRows.length === 0 && yearRows.length === 0) {
+        setSemesterFeedback('');
+        setOverallFeedback('');
+        return;
+      }
+
+      const semModules = semRows.map(r => r.module);
+
+      try {
+        const res = await fetch('http://127.0.0.1:5000/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            semester_gpa: semGpa, 
+            overall_gpa: yearGpa,
+            year: currentYear,
+            semester: currentSemester,
+            modules: semModules
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSemesterFeedback(data.semester_feedback);
+          setOverallFeedback(data.overall_feedback);
+        } else {
+          setSemesterFeedback('');
+          setOverallFeedback('');
+        }
+      } catch (err) {
+        console.log("Could not fetch ML feedback from local server", err);
+      }
+    };
+    fetchFeedback();
   }, [rows, currentYear, currentSemester]);
 
   async function addRow() {
@@ -515,6 +583,30 @@ Use clear bullet points only. Professional and encouraging tone.`;
             })}
           </View>
         </View>
+
+        {/* AI ML Feedback Card */}
+        {(semesterFeedback !== '' || overallFeedback !== '') && (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <IconSymbol size={24} name="sparkles" color="#3B82F6" />
+              <Text style={styles.cardTitle}>Performance Analysis</Text>
+            </View>
+            
+            {semesterFeedback !== '' && (
+              <View style={styles.feedbackBlock}>
+                <Text style={styles.feedbackLabel}>Semester Analysis</Text>
+                <Text style={styles.feedbackText}>{semesterFeedback}</Text>
+              </View>
+            )}
+
+            {overallFeedback !== '' && (
+              <View style={styles.feedbackBlock}>
+                <Text style={styles.feedbackLabel}>Yearly Overview</Text>
+                <Text style={styles.feedbackText}>{overallFeedback}</Text>
+              </View>
+            )}
+          </View>
+        )}
       </ScrollView>
 
       {/* Animated Chatbot FAB - Updated Icon */}
@@ -794,47 +886,54 @@ const styles = StyleSheet.create({
   gpaValue: { fontSize: 64, fontWeight: '800', color: '#60A5FA', letterSpacing: -2 },
   gpaMeta: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: 'center',    justifyContent: 'center',
     marginTop: 16,
     backgroundColor: 'rgba(30, 64, 175, 0.2)',
-    paddingHorizontal: 24,
     paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 16,
   },
   metaBox: { alignItems: 'center' },
-  metaLabel: { color: '#94A3B8', fontSize: 11, fontWeight: '600', textTransform: 'uppercase', marginBottom: 2 },
-  metaText: { color: '#CBD5E1', fontSize: 16, fontWeight: '700' },
-  metaDivider: { width: 1, height: 24, backgroundColor: '#334155', marginHorizontal: 20 },
+  metaLabel: { fontSize: 11, color: '#94A3B8', fontWeight: '600', textTransform: 'uppercase', marginBottom: 4 },
+  metaText: { fontSize: 16, fontWeight: '700', color: '#FFFFFF' },
+  metaDivider: { width: 1, height: 24, backgroundColor: '#334155', marginHorizontal: 24 },
 
   inputGroup: { marginBottom: 16 },
-  inputLabel: { fontSize: 14, fontWeight: '600', color: '#64748B', marginBottom: 6 },
+  inputLabel: { fontSize: 13, fontWeight: '600', color: '#64748B', marginBottom: 8 },
   plannerInput: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FAFBFC',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 14,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 17,
-    fontWeight: '600',
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#0F172A',
+    fontWeight: '500',
   },
   resultBox: {
-    backgroundColor: '#F0F9FF',
-    borderRadius: 14,
-    padding: 16,
-    marginVertical: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    padding: 16,
+    borderRadius: 16,
+    marginTop: 8,
+    marginBottom: 12,
   },
-  resultLabel: { fontSize: 14, color: '#0369A1', fontWeight: '600' },
-  resultValue: { fontSize: 32, fontWeight: '800', color: '#0C4A6E', marginTop: 4 },
-  guidanceText: { fontSize: 15, lineHeight: 22, color: '#334155', fontWeight: '500' },
+  resultLabel: { fontSize: 15, fontWeight: '700', color: '#1E3A8A' },
+  resultValue: { fontSize: 24, fontWeight: '800', color: '#2563EB' },
+  guidanceText: { fontSize: 14, color: '#475569', lineHeight: 20 },
 
-  distGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 16, justifyContent: 'center' },
-  distItem: { alignItems: 'center', width: 55 },
-  distGrade: { fontSize: 13, fontWeight: '700', color: '#1E40AF', marginBottom: 6 },
-  distBar: { width: 28, backgroundColor: '#BFDBFE', borderRadius: 999 },
-  distCount: { marginTop: 6, fontSize: 18, fontWeight: '700', color: '#0F172A' },
+  distGrid: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', height: 160, paddingTop: 20 },
+  distItem: { alignItems: 'center', width: 32 },
+  distGrade: { fontSize: 13, fontWeight: '700', color: '#64748B', marginBottom: 8 },
+  distBar: { width: 20, backgroundColor: '#3B82F6', borderRadius: 4, opacity: 0.8 },
+  distCount: { fontSize: 12, fontWeight: '600', color: '#94A3B8', marginTop: 8 },
+
+  feedbackBlock: { marginTop: 12, backgroundColor: '#F8FAFC', padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#E2E8F0' },
+  feedbackLabel: { fontSize: 14, fontWeight: '700', color: '#1E40AF', marginBottom: 6 },
+  feedbackText: { fontSize: 15, color: '#334155', lineHeight: 22 },
 
   emptyState: { alignItems: 'center', paddingVertical: 50 },
   emptyText: { marginTop: 16, fontSize: 16, color: '#64748B', fontWeight: '600' },
@@ -842,51 +941,51 @@ const styles = StyleSheet.create({
 
   fab: {
     position: 'absolute',
-    bottom: 28,
-    right: 24,
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    bottom: 90,
+    right: 20,
     backgroundColor: '#1E40AF',
-    justifyContent: 'center',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     alignItems: 'center',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.45,
-    shadowRadius: 20,
-    elevation: 15,
+    justifyContent: 'center',
+    shadowColor: '#1E40AF',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 8,
   },
-
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.7)', justifyContent: 'flex-end' },
+  
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+    justifyContent: 'flex-end',
+  },
   modalContent: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    paddingTop: 24,
-    paddingHorizontal: 24,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    minHeight: '60%',
     paddingBottom: 40,
-    maxHeight: '88%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 20,
   },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  modalTitle: { fontSize: 24, fontWeight: '700', color: '#0F172A' },
-  modalBody: { paddingBottom: 30 },
-  loading: { paddingVertical: 60, alignItems: 'center' },
-  loadingText: { marginTop: 20, fontSize: 16, color: '#64748B', textAlign: 'center' },
-  aiAdviceText: { fontSize: 16, lineHeight: 26, color: '#1E2937' },
-  modalDoneBtn: {
-    backgroundColor: '#1E40AF',
-    borderRadius: 16,
-    paddingVertical: 16,
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
+    padding: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
-  modalDoneText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' },
-
+  modalTitle: { fontSize: 20, fontWeight: '700', color: '#0F172A' },
+  modalBody: { padding: 24 },
+  
   infoBox: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#EFF6FF',
     padding: 16,
     borderRadius: 12,
     marginBottom: 20,
@@ -901,4 +1000,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   modalSubmitText: { color: '#FFFFFF', fontSize: 18, fontWeight: '700' },
+
+  loading: { alignItems: 'center', justifyContent: 'center', paddingVertical: 40, gap: 16 },
+  loadingText: { color: '#64748B', fontSize: 15, textAlign: 'center' },
+  aiAdviceText: { fontSize: 16, color: '#334155', lineHeight: 26 },
+  
+  modalDoneBtn: {
+    marginHorizontal: 24,
+    marginTop: 8,
+    backgroundColor: '#F1F5F9',
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  modalDoneText: { color: '#475569', fontWeight: '700', fontSize: 16 },
 });

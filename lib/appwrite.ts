@@ -19,6 +19,7 @@ export const SCREENER_RESULTS_COLLECTION_ID = 'screener_results';
 export const TASKS_COLLECTION_ID = 'tasks';
 export const SESSIONS_COLLECTION_ID = 'sessions';
 export const NOTIFICATIONS_COLLECTION_ID = 'notifications';
+export const KUPPI_MATERIALS_COLLECTION_ID = 'kuppi_materials';
 
 // ── Database Operations ──────────────────────────────────
 
@@ -339,6 +340,105 @@ export const saveScreenerResult = async (data: {
     }
   );
   return document;
+};
+
+// ── Kuppi Materials Helpers ───────────────────────────────────
+
+export interface KuppiMaterialDoc {
+  $id?: string;
+  tutorId: string;
+  moduleId: string;
+  moduleTitle: string;
+  title: string;
+  description: string;
+  fileUrl?: string;
+  meetingLink?: string;
+  createdAt: string;
+}
+
+/** Create a new kuppi material */
+export const createKuppiMaterial = async (data: {
+  tutorId: string;
+  moduleId: string;
+  moduleTitle: string;
+  title: string;
+  description: string;
+  fileUrl?: string;
+  meetingLink?: string;
+}): Promise<KuppiMaterialDoc> => {
+  const doc = await databases.createDocument(
+    DATABASE_ID,
+    KUPPI_MATERIALS_COLLECTION_ID,
+    ID.unique(),
+    {
+      tutorId: data.tutorId,
+      moduleId: data.moduleId,
+      moduleTitle: data.moduleTitle,
+      title: data.title,
+      description: data.description,
+      fileUrl: data.fileUrl || '',
+      meetingLink: data.meetingLink || '',
+      createdAt: new Date().toISOString(),
+    }
+  );
+  return doc as any;
+};
+
+/** Get all kuppi materials for a specific module */
+export const getKuppiMaterialsByModule = async (moduleId: string): Promise<KuppiMaterialDoc[]> => {
+  try {
+    const res = await databases.listDocuments(DATABASE_ID, KUPPI_MATERIALS_COLLECTION_ID, [
+      Query.equal('moduleId', moduleId),
+      Query.orderDesc('$createdAt'),
+    ]);
+    return res.documents as unknown as KuppiMaterialDoc[];
+  } catch {
+    return [];
+  }
+};
+
+/** Get all kuppi materials by a tutor */
+export const getKuppiMaterialsByTutor = async (tutorId: string): Promise<KuppiMaterialDoc[]> => {
+  try {
+    const res = await databases.listDocuments(DATABASE_ID, KUPPI_MATERIALS_COLLECTION_ID, [
+      Query.equal('tutorId', tutorId),
+      Query.orderDesc('$createdAt'),
+    ]);
+    return res.documents as unknown as KuppiMaterialDoc[];
+  } catch {
+    return [];
+  }
+};
+
+/** Get all kuppi materials (for student dashboard) */
+export const getAllKuppiMaterials = async (): Promise<KuppiMaterialDoc[]> => {
+  try {
+    const res = await databases.listDocuments(DATABASE_ID, KUPPI_MATERIALS_COLLECTION_ID, [
+      Query.orderDesc('$createdAt'),
+      Query.limit(100),
+    ]);
+    return res.documents as unknown as KuppiMaterialDoc[];
+  } catch {
+    return [];
+  }
+};
+
+/** Update a kuppi material */
+export const updateKuppiMaterial = async (
+  documentId: string,
+  data: Partial<{
+    title: string;
+    description: string;
+    fileUrl: string;
+    meetingLink: string;
+  }>
+): Promise<void> => {
+  await databases.updateDocument(DATABASE_ID, KUPPI_MATERIALS_COLLECTION_ID, documentId, data);
+};
+
+/** Delete a kuppi material */
+export const deleteKuppiMaterial = async (documentId: string): Promise<void> => {
+  await databases.deleteDocument(DATABASE_ID, KUPPI_MATERIALS_COLLECTION_ID, documentId);
 };
 
 export { client };
